@@ -8,3 +8,4 @@ Dumps opcodes from the WoW client and their respective names.
 
 ## TO-DO
 - Implement name diffing
+- Dump packet structures
