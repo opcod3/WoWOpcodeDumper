@@ -17,7 +17,7 @@ int main(int argc, char * argv[])
 	int processId = GetTargetThreadIDFromProcName("WowT_Patched.exe");
 	char buffer[MAX_PATH] = { 0 };
 
-	GetFullPathNameA("./OpcodeDumperDll.dll", MAX_PATH, buffer, NULL);
+	GetFullPathNameA("./OpcodeDumper.dll", MAX_PATH, buffer, NULL);
 
 	if (!Inject(processId, buffer))
 		printf("Dll could not attach.");

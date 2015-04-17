@@ -3,17 +3,17 @@
 int* FindGroupVtableOffset()
 {
 	uint8 pattern[] = { 0xF6, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, // test    byte ptr dword_xxxxxxx, 1
-		0x75, 0x00,                               // jnz     short loc_xxxxxx					    	
-		0x83, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, // or      dword_xxxxxxx, 1
-		0x33, 0xc0,                               // xor     eax, eax
-		0x68, 0x00, 0x00, 0x00, 0x00,             // push    offset sub_xxxxxx
-		0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
-		0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
-		0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
-		0xE8, 0x00, 0x00, 0x00, 0x00,             // call    sub_xxxxxx
-		0x59,                                     // pop     ecx
-		0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3        // mov     eax, offset dword_xxxxxxx
-	};
+						0x75, 0x00,                               // jnz     short loc_xxxxxx					    	
+						0x83, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, // or      dword_xxxxxxx, 1
+						0x33, 0xc0,                               // xor     eax, eax
+						0x68, 0x00, 0x00, 0x00, 0x00,             // push    offset sub_xxxxxx
+						0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
+						0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
+						0xA3, 0x00, 0x00, 0x00, 0x00,             // mov     dword_xxxxxxx, eax
+						0xE8, 0x00, 0x00, 0x00, 0x00,             // call    sub_xxxxxx
+						0x59,                                     // pop     ecx
+						0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3        // mov     eax, offset dword_xxxxxxx
+					};
 
 	std::string patternOptions = "xx?????x?xx?????xxx????x????x????x????x????xx????x";
 	return (int*)*(int*)(((int)FindPattern(pattern, sizeof(pattern), patternOptions)) + 45);
@@ -22,28 +22,28 @@ int* FindGroupVtableOffset()
 int32* FindConsoleWriteOffset()
 {
 	uint8 pattern[] = { 0x55,                                   // push    ebp
-		0x8B, 0xEC,                             // mov     ebp, esp
-		0x8B, 0x45, 0x08,                       // mov     eax, [ebp+arg_0]
-		0x81, 0xEC, 0x00, 0x00, 0x00, 0x00,     // sub     esp, 400h
-		0x85, 0xC0,                             // test    eax, eax
-		0x74, 0x00,                             // jz      short locret_xxxxxx
-		0x80, 0x38, 0x00,                       // cmp     byte ptr [eax], 0
-		0x74, 0x00,                             // jz      short locret_xxxxxx
-		0x8D, 0x4D, 0x10,                       // lea     ecx, [ebp+arg_8]
-		0x51,                                   // push    ecx
-		0x50,                                   // push    eax
-		0x8D, 0x85, 0x00, 0xFC, 0xFF, 0xFF,     // lea     eax, [ebp+var_400]
-		0x68, 0x00, 0x00, 0x00, 0x00,           // push    400h
-		0x50,                                   // push    eax
-		0xE8, 0x00, 0x00, 0x00, 0x00,           // call    sub_xxxxxx
-		0xFF, 0x75, 0x0C,                       // push    [ebp+arg_4]
-		0x8D, 0x85, 0x00, 0xFC, 0xFF, 0xFF,     // lea     eax, [ebp+var_400]
-		0x50,                                   // push    eax
-		0xE8, 0x00, 0x00, 0x00, 0x00,           // call    sub_xxxxxx
-		0x83, 0xC4, 0x18,                       // add     esp, 18h
-		0xC9,                                   // leav
-		0xC3                                    // retn
-	};
+						0x8B, 0xEC,                             // mov     ebp, esp
+						0x8B, 0x45, 0x08,                       // mov     eax, [ebp+arg_0]
+						0x81, 0xEC, 0x00, 0x00, 0x00, 0x00,     // sub     esp, 400h
+						0x85, 0xC0,                             // test    eax, eax
+						0x74, 0x00,                             // jz      short locret_xxxxxx
+						0x80, 0x38, 0x00,                       // cmp     byte ptr [eax], 0
+						0x74, 0x00,                             // jz      short locret_xxxxxx
+						0x8D, 0x4D, 0x10,                       // lea     ecx, [ebp+arg_8]
+						0x51,                                   // push    ecx
+						0x50,                                   // push    eax
+						0x8D, 0x85, 0x00, 0xFC, 0xFF, 0xFF,     // lea     eax, [ebp+var_400]
+						0x68, 0x00, 0x00, 0x00, 0x00,           // push    400h
+						0x50,                                   // push    eax
+						0xE8, 0x00, 0x00, 0x00, 0x00,           // call    sub_xxxxxx
+						0xFF, 0x75, 0x0C,                       // push    [ebp+arg_4]
+						0x8D, 0x85, 0x00, 0xFC, 0xFF, 0xFF,     // lea     eax, [ebp+var_400]
+						0x50,                                   // push    eax
+						0xE8, 0x00, 0x00, 0x00, 0x00,           // call    sub_xxxxxx
+						0x83, 0xC4, 0x18,                       // add     esp, 18h
+						0xC9,                                   // leav
+						0xC3                                    // retn
+					};
 
 	std::string patternOptions = "xxxxxxxx????xxx?xxxx?xxxxxxxxxxxx????xx????xxxxxxxxxxx????xxxxx";
 	return (int32*)FindPattern(pattern, sizeof(pattern), patternOptions);
@@ -52,16 +52,16 @@ int32* FindConsoleWriteOffset()
 ConsoleInfo GetConsoleInfo()
 {
 	uint8 pattern[] = { 0x55,
-		0x8b, 0xec,
-		0x8b, 0x45, 0x08,
-		0x8b, 0x00, 0x3b,
-		0x05, 0x00, 0x00, 0x00, 0x00,
-		0x75, 0x00,
-		0x83, 0x3d, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x74, 0x00, 0x33,
-		0xc0,
-		0x5d,
-		0xc3
+						0x8b, 0xec,
+						0x8b, 0x45, 0x08,
+						0x8b, 0x00, 0x3b,
+						0x05, 0x00, 0x00, 0x00, 0x00,
+						0x75, 0x00,
+						0x83, 0x3d, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x74, 0x00, 0x33,
+						0xc0,
+						0x5d,
+						0xc3
 	};
 
 	ConsoleInfo consoleInfo;
