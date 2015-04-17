@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "sqlite3.h"
 
 enum ConsoleColor
 {
@@ -33,6 +34,42 @@ public:
     void WriteString(char* str, ...);
 private:
     std::ofstream stream;
+};
+
+struct JamData;
+class SQLiteWriter
+{
+public:
+    SQLiteWriter(const char* filePath);
+    ~SQLiteWriter();
+
+    void addCMSG(int opcode, int vTable, int cliPut);
+    void addSMSG(JamData &jamData, int handler);
+private:
+    sqlite3* db;
+    sqlite3_stmt* CMSGstmt;
+    sqlite3_stmt* SMSGstmt;
+    char* createCMSG =
+        "CREATE TABLE CMSG"
+        "("
+        "opcode INTEGER PRIMARY KEY,"
+        "vTable INTEGER,"
+        "cliPut INTEGER"
+        ");";
+    char* createSMSG =
+        "CREATE TABLE SMSG"
+        "("
+        "opcode INTEGER PRIMARY KEY,"
+        "ctor INTEGER,"
+        "callHandler INTEGER,"
+        "Handler INTEGER"
+        ");";
+    char* CMSGInsertQuery =
+        "INSERT INTO CMSG "
+        "VALUES (?,?,?);";
+    char* SMSGInsertQuery =
+        "INSERT into SMSG "
+        "VALUES (?,?,?,?);";
 };
 
 extern FileWriter* shiftDebugLogger;

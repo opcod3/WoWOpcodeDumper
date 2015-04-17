@@ -31,7 +31,7 @@ extern std::string ModulePath;
 extern int Build;
 
 #define MAX_OPCODE 0x1FFF
-#define SHUTDOWN_TIMER 30
+#define SHUTDOWN_TIMER 5
 #define FILENAME_DEBUG "debug.txt"
 #define FILENAME_SHIFT_DEBUG "shift_debug.txt"
 

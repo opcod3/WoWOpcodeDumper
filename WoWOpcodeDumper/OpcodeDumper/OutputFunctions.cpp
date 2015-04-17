@@ -69,3 +69,80 @@ void InitializeDebugLoggers(std::string path)
     else
         assert("Unable to create output directory");
 }
+
+SQLiteWriter::SQLiteWriter(const char* filePath)
+{
+    // Delete DB if it already exists
+    DeleteFileA(filePath);
+
+    int dbResult = sqlite3_open_v2(filePath, &db, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, NULL);
+    if (dbResult)
+    {
+        LOG_DEBUG("Unable to open sqlite database!\nError: %s", sqlite3_errstr(dbResult));
+        assert("Failed to open SQlite databas");
+    }
+
+    // Create CMSG and SMSG tables in DB
+    char* errmsg;
+    if (sqlite3_exec(db, createCMSG, NULL, NULL, &errmsg))
+    {
+        LOG_SHIFT("SQLITE ERROR: %s", errmsg);
+        assert("Failed to create CMSG table in SQLite database");
+    }
+
+    if (sqlite3_exec(db, createSMSG, NULL, NULL, &errmsg))
+    {
+        LOG_SHIFT("SQLITE ERROR: %s", errmsg);
+        assert("Failed to create SMSG table in SQLite database");
+    }
+
+    // Create statements to insert data into tables
+    int err;
+    if (err = sqlite3_prepare_v2(db, CMSGInsertQuery, -1, &CMSGstmt, NULL))
+    {
+        LOG_SHIFT("SQLITE ERROR: %s", sqlite3_errstr(err));
+        assert("Unable to prepare CMSG insert statement");
+    }
+    if (err = sqlite3_prepare_v2(db, SMSGInsertQuery, -1, &SMSGstmt, NULL))
+    {
+        LOG_SHIFT("SQLITE ERROR: %s", sqlite3_errstr(err));
+        assert("Unable to prepare SMSG insert statement");
+    }
+}
+
+SQLiteWriter::~SQLiteWriter()
+{
+    sqlite3_finalize(CMSGstmt);
+    sqlite3_finalize(SMSGstmt);
+    sqlite3_close_v2(db);
+}
+
+void SQLiteWriter::addCMSG(int opcode, int vTable, int cliPut)
+{
+    // Bind values to statement
+    sqlite3_bind_int(CMSGstmt, 1, opcode);
+    sqlite3_bind_int(CMSGstmt, 2, vTable);
+    sqlite3_bind_int(CMSGstmt, 3, cliPut);
+
+    // Run statement
+    sqlite3_step(CMSGstmt);
+
+    // Reset statement
+    sqlite3_reset(CMSGstmt);
+    sqlite3_clear_bindings(CMSGstmt);
+}
+
+void SQLiteWriter::addSMSG(JamData &jamData, int handler)
+{
+    sqlite3_bind_int(SMSGstmt, 1, jamData.opcode);
+    sqlite3_bind_int(SMSGstmt, 2, FIX_ADDR(jamData.ctor));
+    sqlite3_bind_int(SMSGstmt, 3, FIX_ADDR(jamData.callHandler));
+    sqlite3_bind_int(SMSGstmt, 4, handler);
+
+    // Run statement
+    sqlite3_step(SMSGstmt);
+
+    // Reset Statement
+    sqlite3_reset(SMSGstmt);
+    sqlite3_clear_bindings(SMSGstmt);
+}

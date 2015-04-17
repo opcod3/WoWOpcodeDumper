@@ -181,6 +181,9 @@ void main()
     ConsoleWrite("Detected Build: %i", Build);
     LOG_DEBUG("Detected Build: %i", Build);
 
+    // Open SQLite DB writer
+    SQLiteWriter dbWriter((WorkingDir.append("\\Dump.db").c_str()));
+
     FillCallList();
 
     ConsoleWrite("Dumping Opcodes!");
@@ -281,6 +284,7 @@ void main()
         data->table->opCount++;
 
         output->WriteString("0x%04X   %04i   %08X   %08X   %08X   SMSG   %s  %i  %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
+        dbWriter.addSMSG(*data, FIX_ADDR((int)handler));
     }
 
 	// CMSG
@@ -345,6 +349,7 @@ void main()
             continue;
 
 		output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
+        dbWriter.addCMSG(iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
     }
 
     int totalCount = 0;

@@ -87,6 +87,7 @@
     <ClInclude Include="NamingFunctions.h" />
     <ClInclude Include="OutputFunctions.h" />
     <ClInclude Include="PatternFunctions.h" />
+    <ClInclude Include="sqlite3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -96,6 +97,7 @@
     <ClCompile Include="NamingFunctions.cpp" />
     <ClCompile Include="OutputFunctions.cpp" />
     <ClCompile Include="PatternFunctions.cpp" />
+    <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
