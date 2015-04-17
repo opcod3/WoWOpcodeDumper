@@ -273,7 +273,7 @@ void main()
             data->table->trueOpCount++;
         data->table->opCount++;
 
-        output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor, data->callHandler, handler, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? "" : " - Fake Opcode");
+		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0x260000, data->callHandler - 0x260000, handler - 0x260000, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? "" : " - Fake Opcode");
     }
 
     uint8 patternBuffer[] = { 0x55, 0x8b, 0xec, 0x8b, 0x45, 0x08, 0x83, 0x60, 0x04, 0x00, 0x83, 0x60, 0x08, 0x00, 0xc7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5d, 0xc2, 0x04, 0x00 };
@@ -323,7 +323,7 @@ void main()
         if (iter == cmsgMap.end())
             continue;
 
-        output->WriteString("0x%04X %i %X %X CMSG", iter->first, iter->first, iter->second.offset, *(int*)iter->second.putData);
+		output->WriteString("0x%04X %i %X %X CMSG", iter->first, iter->first, iter->second.offset - 0xCB0000, *(int*)iter->second.putData - 0xCB0000);
     }
 
     int totalCount = 0;
