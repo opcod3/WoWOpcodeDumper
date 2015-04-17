@@ -1,5 +1,10 @@
 # WoWOpcodeDumper
-Dumps opcodes and names for WoW. 
+Dumps opcodes from the WoW client and their respective names. 
 
-Basically, all you have to do is rename the executable name in Injector.cpp to whatever your wow's name is, and run it with wow open.
-It doesn't dump names yet. Trying to figure out the best method.
+
+## Usage
+1. Run the Wow client you whish to dump opcodes from.
+2. Run `Injector.exe [wow_process_name]` 
+
+## TO-DO
+- Implement name diffing

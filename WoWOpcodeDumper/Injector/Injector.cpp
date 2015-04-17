@@ -7,53 +7,99 @@
 #include <stdlib.h>
 
 #define WIN32_LEAN_AND_MEAN
-#define CREATE_THREAD_ACCESS (PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ)
 
-BOOL Inject(DWORD pID, const char * DLL_NAME);
-DWORD GetTargetThreadIDFromProcName(const char * ProcName);
+// Possilbe names of the process to attach to
+std::string processNames[] = { /*Used for setting a name with an argument*/"", "Wow.exe", "Wow_Patched.exe", "WowT.exe", "WoWT_Patched.exe" };
+// Name of DLL to inject
+char* dllToInjectName = "OpcodeDumper.dll";
+
+// Injects DLL into a process
+BOOL Inject(DWORD pID, const char * DLL_PATH);
+// Gets pID of process found by name
+DWORD GetTargetThreadID();
+// Prompts user for input and pauses console
+void PauseSystem();
 
 int main(int argc, char * argv[])
 {
-	int processId = GetTargetThreadIDFromProcName("WowT_Patched.exe");
+    // Set pretty title
+    SetConsoleTitle("WoWOpcodeDumper Injector");
+
+    if (argc > 2)
+    {
+        printf("ERROR: Too many arguments. ");
+        printf("Usage is: \"Injector.exe [wow_process_name]\"");
+        PauseSystem();
+        return 1;
+    }
+    // Set custom process name
+    else if (argc == 2)
+        processNames[0] = std::string(argv[1]);
+
+    // Get process in which to inject
+	int processId = GetTargetThreadID();
+
+    //Exit if no process found
+    if (processId == 0)
+    {
+        printf("ERROR: Wow process not found!");
+        PauseSystem();
+        return 1;
+    }
+
+    // Get path of DLL to inject
 	char buffer[MAX_PATH] = { 0 };
+	GetFullPathNameA(dllToInjectName, MAX_PATH, buffer, NULL);
 
-	GetFullPathNameA("./OpcodeDumper.dll", MAX_PATH, buffer, NULL);
 
-	if (!Inject(processId, buffer))
-		printf("Dll could not attach.");
+    // Try to inject
+    if (!Inject(processId, buffer))
+    {
+        printf("ERROR: Dll failed to inject.");
+        PauseSystem();
+    }
 	else
-		printf("Dll was properly loaded.");
-	_getch();
+		printf("Dll has been injected!");
+
+    Sleep(5000);
 	return 0;
 }
 
-BOOL Inject(DWORD pID, const char * DLL_NAME)
+BOOL Inject(DWORD pID, const char * DLL_PATH)
 {
 	HANDLE Proc;
 	LPVOID remoteString, loadLibraryA;
 
-	if (!pID)
-		return false;
-
 	Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pID);
 
-	if (!Proc)
-		return false;
+    if (!Proc)
+    {
+        printf("ERROR: Unable to open process.");
+        return false;
+    }
 
+    // Get address of LoadLibraryA function
 	loadLibraryA = (LPVOID)GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
-	remoteString = (LPVOID)VirtualAllocEx(Proc, NULL, strlen(DLL_NAME), MEM_COMMIT, PAGE_READWRITE);
-	WriteProcessMemory(Proc, (LPVOID)remoteString, DLL_NAME, strlen(DLL_NAME), NULL);
+
+    // Reserve some space in memory for DLL_PATH string
+	remoteString = (LPVOID)VirtualAllocEx(Proc, NULL, strlen(DLL_PATH), MEM_COMMIT, PAGE_READWRITE);
+    // Write DLL_PATH to memory
+	WriteProcessMemory(Proc, (LPVOID)remoteString, DLL_PATH, strlen(DLL_PATH), NULL);
+
+    // Create thread
 	HANDLE remoteThread = CreateRemoteThread(Proc, NULL, NULL, (LPTHREAD_START_ROUTINE)loadLibraryA, (LPVOID)remoteString, NULL, NULL);
 
 	if (remoteThread)
 		WaitForSingleObject(remoteThread, INFINITE);
 
-	VirtualFreeEx(Proc, remoteString, strlen(DLL_NAME), MEM_RELEASE);
+    // Free reserved memory and close handle
+	VirtualFreeEx(Proc, remoteString, strlen(DLL_PATH), MEM_RELEASE);
 	CloseHandle(Proc);
+
 	return true;
 }
 
-DWORD GetTargetThreadIDFromProcName(const char * ProcName)
+DWORD GetTargetThreadID()
 {
 	tagPROCESSENTRY32 pe;
 	HANDLE snapShot;
@@ -61,8 +107,11 @@ DWORD GetTargetThreadIDFromProcName(const char * ProcName)
 
 	snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-	if (snapShot == INVALID_HANDLE_VALUE)
-		return false;
+    if (snapShot == INVALID_HANDLE_VALUE)
+    {
+        printf("ERROR: Unable to take process snapshot.");
+        return 0;
+    }
 
 	pe.dwSize = sizeof(tagPROCESSENTRY32);
 
@@ -70,12 +119,22 @@ DWORD GetTargetThreadIDFromProcName(const char * ProcName)
 
 	while (retval)
 	{
-		if (_stricmp(pe.szExeFile, ProcName) == 0)
-		{
-			return pe.th32ProcessID;
-		}
+        int length = sizeof(processNames) / sizeof(std::string);
+        for (int i = 0; i < length; i++)
+        {
+            if (_stricmp(pe.szExeFile, processNames[i].c_str()) == 0)
+            {
+                return pe.th32ProcessID;
+            }
+        }
 
 		retval = Process32Next(snapShot, &pe);
 	}
 	return 0;
+}
+
+void PauseSystem()
+{
+    printf("Press any key to continue...");
+    getchar();
 }
