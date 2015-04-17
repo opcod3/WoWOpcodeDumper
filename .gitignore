@@ -8,6 +8,11 @@ WoWOpcodeDumper/Injector/bin/*
 WoWOpcodeDumper/Injector/obj
 WoWOpcodeDumper/Injector/obj/*
 
+WoWOpcodeDumper/OpcodeDiffer/bin
+WoWOpcodeDumper/OpcodeDiffer/bin/*
+WoWOpcodeDumper/OpcodeDiffer/obj
+WoWOpcodeDumper/OpcodeDiffer/obj/*
+
 # Created by https://www.gitignore.io
 
 ### VisualStudio ###

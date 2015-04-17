@@ -337,9 +337,9 @@ void main()
         continue;
     }
 
-    output->WriteString("--------------------------------------------");
-    output->WriteString("  Hex  |  Dec  | Ctor | CallHandler | Type |");
-    output->WriteString("--------------------------------------------");
+    output->WriteString("---------------------------------------------");
+    output->WriteString("  Hex  |  Dec  |  VTable  |  CliPut  | Type |");
+    output->WriteString("---------------------------------------------");
     
     for (int i = 0; i < 0x1FFF; i++)
     {
