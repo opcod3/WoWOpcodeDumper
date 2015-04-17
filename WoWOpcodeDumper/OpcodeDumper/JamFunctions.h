@@ -15,8 +15,8 @@ struct RawGroupVtable
 {
 	uint8* name;
 	int isJam;
-	int unused; // Added in 18764
-	int unused2; // Added in 18764
+	int unused;
+	int unused2;
 	int isInstanceServer;
 	int Exec;
 	int unk;
