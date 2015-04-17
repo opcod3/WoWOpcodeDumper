@@ -198,6 +198,7 @@ void main()
     possibleJamPatterns.push_back({ 0xFF, 0x73, 0x0C });
     possibleJamPatterns.push_back({ 0xFF, 0x75, 0x0C });
 
+	// SMSG
     LOG_DEBUG("Dumping Groups");
     for (int i = 0; i < groupCount; i++)
     {
@@ -273,9 +274,10 @@ void main()
             data->table->trueOpCount++;
         data->table->opCount++;
 
-		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0x260000, data->callHandler - 0x260000, handler - 0x260000, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? "" : " - Fake Opcode");
+		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0xCB0000, data->callHandler - 0xCB0000, handler - 0xCB0000, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? "" : " - Fake Opcode");
     }
 
+	// CMSG
     uint8 patternBuffer[] = { 0x55, 0x8b, 0xec, 0x8b, 0x45, 0x08, 0x83, 0x60, 0x04, 0x00, 0x83, 0x60, 0x08, 0x00, 0xc7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5d, 0xc2, 0x04, 0x00 };
     std::string patternOp = "ppppppppppppppppaaaapppp";
     uint8 secondBuff[4];
