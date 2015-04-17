@@ -183,6 +183,8 @@ void main()
 
     FillCallList();
 
+    ConsoleWrite("Dumping Opcodes!");
+
     int32* addr = FindGroupVtableOffset();
     LOG_DEBUG("GroupVtableListPointer: 0x%08X (0x%08X)", FIX_ADDR(addr), addr);
     assert("Wrong GroupVtableListPointer" && addr);
@@ -259,6 +261,10 @@ void main()
         else
         ConsoleWrite("duplicate %X %X", newOpcodeMap.find(iter->second->opcode)->second->addr, iter->second->addr);
 
+    output->WriteString("----------------------------------------------------------------------------");
+    output->WriteString(" Hex  |  Dec  |  Ctor  | CallHandler |  Handler | Type |  JamGroup  | Name |");
+    output->WriteString("----------------------------------------------------------------------------");
+
     for (int i = 0; i < MAX_OPCODE; i++)
     {
         std::unordered_map<int, JamData*>::const_iterator iter = newOpcodeMap.find(i);
@@ -273,8 +279,8 @@ void main()
         if (handler)
             data->table->trueOpCount++;
         data->table->opCount++;
-																										 // 0xXXXXXX offset changes from patch to patch. Fix this hack.   
-        output->WriteString("0x%04X %04i %08X %08X %08X SMSG %s %i %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
+
+        output->WriteString("0x%04X   %04i   %08X   %08X   %08X   SMSG   %s  %i  %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
     }
 
 	// CMSG
@@ -327,6 +333,10 @@ void main()
         continue;
     }
 
+    output->WriteString("--------------------------------------------");
+    output->WriteString("  Hex  |  Dec  | Ctor | CallHandler | Type |");
+    output->WriteString("--------------------------------------------");
+    
     for (int i = 0; i < 0x1FFF; i++)
     {
         std::unordered_map<int, CMSGOP>::const_iterator iter = cmsgMap.find(i);
@@ -334,7 +344,7 @@ void main()
         if (iter == cmsgMap.end())
             continue;
 
-		output->WriteString("0x%04X %04i %08X %08X CMSG", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
+		output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
     }
 
     int totalCount = 0;
