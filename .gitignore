@@ -1,4 +1,12 @@
+WoWOpcodeDumper/WoWOpcodeDumper/bin
+WoWOpcodeDumper/WoWOpcodeDumper/bin/*
+WoWOpcodeDumper/WoWOpcodeDumper/obj
+WoWOpcodeDumper/WoWOpcodeDumper/obj/*
 
+WoWOpcodeDumper/Injector/bin
+WoWOpcodeDumper/Injector/bin/*
+WoWOpcodeDumper/Injector/obj
+WoWOpcodeDumper/Injector/obj/*
 
 # Created by https://www.gitignore.io
 
