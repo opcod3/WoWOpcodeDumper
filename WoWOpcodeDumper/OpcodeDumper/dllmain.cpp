@@ -278,7 +278,16 @@ void main()
     }
 
 	// CMSG
-    uint8 patternBuffer[] = { 0x55, 0x8b, 0xec, 0x8b, 0x45, 0x08, 0x83, 0x60, 0x04, 0x00, 0x83, 0x60, 0x08, 0x00, 0xc7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5d, 0xc2, 0x04, 0x00 };
+    uint8 patternBuffer[] = { 0x55, 
+		                      0x8B, 0xEC, 
+		                      0x8B, 0x45, 0x08, 
+		                      0x83, 0x60, 0x04, 0x00, 
+		                      0x83, 0x60, 0x08, 0x00, 
+		                      0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 
+		                      0x5D, 
+		                      0xC2, 0x04, 0x00 
+                            };
+
     std::string patternOp = "ppppppppppppppppaaaapppp";
     uint8 secondBuff[4];
     int newAddr = (int)FindPattern(patternBuffer, sizeof(patternBuffer), patternOp);
@@ -336,13 +345,13 @@ void main()
         GroupVtable* group = groups[i];
         totalCount += group->opCount;
         trueCount += group->trueOpCount;
-        ConsoleWrite("Group: \"%s\" has %i opcodes (%i fake, %i total)", group->name, group->trueOpCount, group->opCount - group->trueOpCount, group->opCount);
+        ConsoleWrite("JAMGroup: \"%s\" has %i opcodes (%i fake, %i total)", group->name, group->trueOpCount, group->opCount - group->trueOpCount, group->opCount);
     }
 
-    ConsoleWrite("Found %i SMSG opcodes (%i fake, %i total)", trueCount, totalCount - trueCount, totalCount);
-    ConsoleWrite("Found %i CMSG opcodes", cmsgOpList.size());
+    ConsoleWrite("%i -- SMSG opcodes were dumped (%i fake, %i total)", trueCount, totalCount - trueCount, totalCount);
+    ConsoleWrite("%i -- CMSG opcodes were dumped", cmsgOpList.size());
     ConsoleWrite("Execution Took: %i MS", GetTickCount() - initialTicks);
-    ConsoleWrite("Shutting down in %i seconds", SHUTDOWN_TIMER);
+    ConsoleWrite("Shutting down WoW in %i seconds", SHUTDOWN_TIMER);
 
     // Flush & Close loggers & output ~
     delete output;
