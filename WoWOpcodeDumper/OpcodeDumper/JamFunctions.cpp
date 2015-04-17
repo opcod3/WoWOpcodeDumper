@@ -19,10 +19,6 @@ char GroupVtable::Call(FakeStore* a1, int a2, int a3, int a4, unsigned int a5, F
     pCall call = (pCall)Exec;
     char result = call((int)a1, a2, a3, a4, a5, (int)a6);
 
-	if (a6 == 0)
-		ConsoleWrite("Fake opcode: ", a5);
-		return false;
-
     return result;
 }
 
