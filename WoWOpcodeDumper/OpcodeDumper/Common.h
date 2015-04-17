@@ -1,4 +1,10 @@
 #include "Windows.h"
+#include "GeneralFunctions.h"
+#include "JamFunctions.h"
+#include "ModuleFunctions.h"
+#include "NamingFunctions.h"
+#include "OutputFunctions.h"
+#include "PatternFunctions.h"
 
 #include <assert.h>
 #include <fstream>

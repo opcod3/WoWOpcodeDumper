@@ -1,8 +1,12 @@
 #pragma once
-class NamingFunctions
+#include "Common.h"
+
+struct CallEntry
 {
-public:
-	NamingFunctions();
-	~NamingFunctions();
+    int* addr;
+    int setValue;
 };
+
+extern std::list<CallEntry*> CallList;
+extern std::list<int> CallHandlerList;
 

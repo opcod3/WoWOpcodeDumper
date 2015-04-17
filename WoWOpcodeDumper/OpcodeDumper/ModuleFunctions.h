@@ -1,8 +1,6 @@
 #pragma once
-class ModuleFunctions
-{
-public:
-	ModuleFunctions();
-	~ModuleFunctions();
-};
+#include "Common.h"
 
+extern HMODULE GetMainModule();
+extern int GetMainModuleSize();
+extern int GetMainModuleAddress();
