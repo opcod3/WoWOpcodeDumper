@@ -273,8 +273,8 @@ void main()
         if (handler)
             data->table->trueOpCount++;
         data->table->opCount++;
-
-		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0xCB0000, data->callHandler - 0xCB0000, handler - 0xCB0000, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? "" : " - Fake Opcode");
+																										 // 0xXXXXXX offset changes from patch to patch. Fix this hack.   
+		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0xCB0000, data->callHandler - 0xCB0000, handler, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
     }
 
 	// CMSG
