@@ -1,7 +1,7 @@
-WoWOpcodeDumper/WoWOpcodeDumper/bin
-WoWOpcodeDumper/WoWOpcodeDumper/bin/*
-WoWOpcodeDumper/WoWOpcodeDumper/obj
-WoWOpcodeDumper/WoWOpcodeDumper/obj/*
+WoWOpcodeDumper/OpcodeDumper/bin
+WoWOpcodeDumper/OpcodeDumper/bin/*
+WoWOpcodeDumper/OpcodeDumper/obj
+WoWOpcodeDumper/OpcodeDumper/obj/*
 
 WoWOpcodeDumper/Injector/bin
 WoWOpcodeDumper/Injector/bin/*

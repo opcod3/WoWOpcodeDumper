@@ -30,8 +30,6 @@ int main(int argc, char * argv[])
 BOOL Inject(DWORD pID, const char * DLL_NAME)
 {
 	HANDLE Proc;
-	HMODULE hLib;
-
 	LPVOID remoteString, loadLibraryA;
 
 	if (!pID)

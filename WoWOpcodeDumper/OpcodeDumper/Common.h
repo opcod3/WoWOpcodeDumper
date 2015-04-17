@@ -1,0 +1,35 @@
+#include "Windows.h"
+
+#include <assert.h>
+#include <fstream>
+#include <list>
+#include <vector>
+#include <map>
+#include <string>
+#include <unordered_map>
+#include <memory>
+#include <Psapi.h>
+#include <stdarg.h>
+
+typedef __int64            int64;
+typedef __int32            int32;
+typedef __int16            int16;
+typedef char                int8;
+typedef unsigned __int64  uint64;
+typedef unsigned __int32  uint32;
+typedef unsigned __int16  uint16;
+typedef unsigned char      uint8;
+
+extern std::string WorkingDir;
+extern std::string ModulePath;
+extern int Build;
+
+#define MAX_OPCODE 0x1FFF
+#define SHUTDOWN_TIMER 30
+#define FILENAME_DEBUG "debug.txt"
+#define FILENAME_SHIFT_DEBUG "shift_debug.txt"
+
+#define LOG_DEBUG debugLogger->WriteString
+#define LOG_SHIFT shiftDebugLogger->WriteString
+
+#pragma once
