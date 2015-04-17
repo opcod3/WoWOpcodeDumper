@@ -27,8 +27,8 @@ int main(int argc, char * argv[])
 
     if (argc > 2)
     {
-        printf("ERROR: Too many arguments. ");
-        printf("Usage is: \"Injector.exe [wow_process_name]\"");
+        printf("ERROR: Too many arguments.\n");
+        printf("Usage is: \"Injector.exe [wow_process_name]\"\n");
         PauseSystem();
         return 1;
     }
@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
     //Exit if no process found
     if (processId == 0)
     {
-        printf("ERROR: Wow process not found!");
+        printf("ERROR: Wow process not found!\n");
         PauseSystem();
         return 1;
     }
@@ -55,13 +55,14 @@ int main(int argc, char * argv[])
     // Try to inject
     if (!Inject(processId, buffer))
     {
-        printf("ERROR: Dll failed to inject.");
+        printf("ERROR: Dll failed to inject.\n");
         PauseSystem();
     }
 	else
-		printf("Dll has been injected!");
+		printf("Dll has been injected!\n");
 
-    Sleep(5000);
+    printf("Exiting... ");
+    Sleep(3000);
 	return 0;
 }
 
@@ -74,7 +75,7 @@ BOOL Inject(DWORD pID, const char * DLL_PATH)
 
     if (!Proc)
     {
-        printf("ERROR: Unable to open process.");
+        printf("ERROR: Unable to open process.\n");
         return false;
     }
 
@@ -135,6 +136,6 @@ DWORD GetTargetThreadID()
 
 void PauseSystem()
 {
-    printf("Press any key to continue...");
+    printf("\nPress any key to continue...");
     getchar();
 }
