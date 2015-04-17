@@ -37,5 +37,6 @@ extern int Build;
 
 #define LOG_DEBUG debugLogger->WriteString
 #define LOG_SHIFT shiftDebugLogger->WriteString
+#define FIX_ADDR(addr)(addr - (int)GetModuleHandle(NULL))
 
 #pragma once

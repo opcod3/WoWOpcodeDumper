@@ -97,9 +97,10 @@ void InitializeConsole()
 	ConsoleInfo info = GetConsoleInfo();
 	int ConsoleWriteAddr = (int)FindConsoleWriteOffset();
 
-	LOG_DEBUG("ConsoleHokeyAddr: 0x%08X (0x%08X)", info.HotkeyAddr, info.HotkeyAddr);
-	LOG_DEBUG("ConsoleEnabledAddr: 0x%08X (0x%08X)", info.EnableAddr, info.EnableAddr);
-	LOG_DEBUG("ConsoleWriteAAddr: 0x%08X (0x%08X)", ConsoleWriteAddr, ConsoleWriteAddr);
+    LOG_DEBUG("BaseAddr: 0x%08X", GetModuleHandle(NULL));
+    LOG_DEBUG("ConsoleHokeyAddr: 0x%08X (0x%08X)", FIX_ADDR(info.HotkeyAddr), info.HotkeyAddr);
+    LOG_DEBUG("ConsoleEnabledAddr: 0x%08X (0x%08X)", FIX_ADDR(info.EnableAddr), info.EnableAddr);
+    LOG_DEBUG("ConsoleWriteAAddr: 0x%08X (0x%08X)", FIX_ADDR(ConsoleWriteAddr), ConsoleWriteAddr);
 
 	assert("Missing ConsoleHotkeyAddr" && info.HotkeyAddr);
 	assert("Missing ConsoleEnabledAddr" && info.EnableAddr);

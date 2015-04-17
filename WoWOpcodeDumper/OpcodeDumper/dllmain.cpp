@@ -184,7 +184,7 @@ void main()
     FillCallList();
 
     int32* addr = FindGroupVtableOffset();
-    LOG_DEBUG("GroupVtableListPointer: 0x%08X (0x%08X)", addr, addr);
+    LOG_DEBUG("GroupVtableListPointer: 0x%08X (0x%08X)", FIX_ADDR(addr), addr);
     assert("Wrong GroupVtableListPointer" && addr);
 
     uint8 groupCount = addr[1];
@@ -205,8 +205,8 @@ void main()
         RawGroupVtable* rawTable = (RawGroupVtable*)((int32**)*addr)[i];
         GroupVtable* vtable = new GroupVtable(rawTable);
 
-        LOG_DEBUG("[%i] %s - 0x%08X", i, vtable->name, rawTable);
-        LOG_DEBUG("[%i] Call function at %08X size %i", i, vtable->ReallCall, vtable->ReallCallSize);
+        LOG_DEBUG("[%i] %s - 0x%08X", i, vtable->name, FIX_ADDR(rawTable));
+        LOG_DEBUG("[%i] Call function at 0x%08X size %i", i, FIX_ADDR(vtable->ReallCall), vtable->ReallCallSize);
         groups[i] = vtable;
 
         for (std::list<std::vector<uint8>>::const_iterator itr = possibleJamPatterns.begin(); itr != possibleJamPatterns.end(); itr++)
@@ -274,7 +274,7 @@ void main()
             data->table->trueOpCount++;
         data->table->opCount++;
 																										 // 0xXXXXXX offset changes from patch to patch. Fix this hack.   
-		output->WriteString("0x%04X %i %06X %06X %06X SMSG %s %i %s%s", data->opcode, data->opcode, data->ctor - 0xCB0000, data->callHandler - 0xCB0000, handler, data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
+        output->WriteString("0x%04X %04i %08X %08X %08X SMSG %s %i %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
     }
 
 	// CMSG
@@ -334,7 +334,7 @@ void main()
         if (iter == cmsgMap.end())
             continue;
 
-		output->WriteString("0x%04X %i %X %X CMSG", iter->first, iter->first, iter->second.offset - 0xCB0000, *(int*)iter->second.putData - 0xCB0000);
+		output->WriteString("0x%04X %04i %08X %08X CMSG", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
     }
 
     int totalCount = 0;
