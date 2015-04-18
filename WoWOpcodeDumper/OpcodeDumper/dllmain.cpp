@@ -9,13 +9,6 @@ OpcodeMap opcodeMap;
 FileWriter* output = nullptr;
 int lastOpcode;
 
-struct CMSGOP
-{
-	int offset;
-	int putData;
-	int putOpcode;
-};
-
 void FillCallList()
 {
 	uint8 list[] = { 0xC7, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -158,6 +151,59 @@ bool IsCMSG(void* argAddr)
 	return false;
 }
 
+uint8* getCMSGCaller(uint8* vTable)
+{
+    uint8 caller1[] = { 0x8B, 0xC1 };       // mov eax, ecx
+    uint8 caller2[] = { 0x56, 0x8B, 0xF1 }; // push esi | mov esi, ecx
+    uint8 caller3[] = { 0x55, 0x85, 0xEC }; // push ebp | mov ebp, esp
+
+    // Convert vTable pointer to byte array
+    uint8 vTableAddr[4];
+    memcpy(vTableAddr, &vTable, sizeof(vTable));
+
+    uint8* xRef = (uint8*)FindPattern(vTableAddr, sizeof(vTableAddr), "pppp");
+
+    uint8* callerFunc = xRef - 1;
+    bool found = false;
+    while (!found)
+    {
+        if (callerFunc[0] == caller1[0])
+        {
+            if (callerFunc[1] == caller1[1])
+            {
+                found = true;
+                break;
+            }
+                
+        }
+        
+        if (callerFunc[0] == caller2[0])
+        {
+            if (callerFunc[1] == caller2[1])
+                if (callerFunc[2] == caller2[2])
+                {
+                    found = true;
+                    break;
+                }
+        }
+
+        if (callerFunc[0] == caller3[0])
+        {
+            if (callerFunc[1] == caller3[1])
+                if (callerFunc[2] == caller3[2])
+                {
+                    found = true;
+                    break;
+                }
+                    
+        }
+
+        callerFunc -= 1;
+    }
+
+    return callerFunc;
+}
+
 void main()
 {
     int initialTicks = GetTickCount();
@@ -288,22 +334,30 @@ void main()
     }
 
 	// CMSG
-    uint8 patternBuffer[] = { 0x55, 
-		                      0x8B, 0xEC, 
-		                      0x8B, 0x45, 0x08, 
-		                      0x83, 0x60, 0x04, 0x00, 
-		                      0x83, 0x60, 0x08, 0x00, 
-		                      0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		                      0x5D, 
-		                      0xC2, 0x04, 0x00 
+
+    // Pattern of the destructor used in CMSGs
+    uint8 dtorPattern[] = {   0x55,                                // push     ebp
+		                      0x8B, 0xEC,                          // mov      ebo, esp
+		                      0x8B, 0x45, 0x08,                    // mov      eax, [ebp+a1]
+		                      0x83, 0x60, 0x04, 0x00,              // and      dword ptr [eax+4], 0
+		                      0x83, 0x60, 0x08, 0x00,              // and      dword ptr [eax+8], 0
+		                      0xC7, 0x00, 0x00, 0x00, 0x00, 0x00,  // mov      dword ptr [eax], offset unk_XXXXXX
+		                      0x5D,                                // pop      ebp
+		                      0xC2, 0x04, 0x00                     // retn     4
                             };
 
     std::string patternOp = "ppppppppppppppppaaaapppp";
-    uint8 secondBuff[4];
-    int newAddr = (int)FindPattern(patternBuffer, sizeof(patternBuffer), patternOp);
-    memcpy(secondBuff, (uint8*)&newAddr, sizeof(secondBuff));
-    std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, secondBuff, sizeof(secondBuff), "pppp");
 
+    // Turn dtor address to a byte array
+    uint8 dtorAddr[4];
+    int dtorAddr_i = (int)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
+    memcpy(dtorAddr, (uint8*)&dtorAddr_i, sizeof(dtorAddr));
+
+    // Find all occurrences of the dtor 
+    // TO-DO: figure out what 0x800000 is
+    std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, dtorAddr, sizeof(dtorAddr), "pppp");
+
+    // Go through all occurrences of the dtor
     std::unordered_map<int, CMSGOP> cmsgMap;
     for (std::list<void*> ::const_iterator iter = cmsgOpList.begin(); iter != cmsgOpList.end(); )
 	{
@@ -323,6 +377,7 @@ void main()
             op.offset = ((int)*iter) - 12;
             op.putData = ((int)*iter) - 8;
             op.putOpcode = ((int)*iter) - 4;
+            op.caller = (int)getCMSGCaller((uint8*)op.offset);
             int opcode;
             if (addr[9] == 0x6A)
                 opcode = addr[0xA];
@@ -348,8 +403,8 @@ void main()
         if (iter == cmsgMap.end())
             continue;
 
-		output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
-        dbWriter.addCMSG(iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData));
+        output->WriteString("0x%04X   %04i   %08X   %08X   CMSG   %08X", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData), FIX_ADDR(iter->second.caller));
+        dbWriter.addCMSG(iter->second, iter->first);
     }
 
     int totalCount = 0;

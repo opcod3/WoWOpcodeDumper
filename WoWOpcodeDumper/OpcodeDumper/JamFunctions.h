@@ -61,4 +61,12 @@ struct JamData
 	GroupVtable* table;
 };
 
+struct CMSGOP
+{
+    int offset;
+    int putData;
+    int putOpcode;
+    int caller;
+};
+
 typedef std::unordered_map<int, JamData*> OpcodeMap;

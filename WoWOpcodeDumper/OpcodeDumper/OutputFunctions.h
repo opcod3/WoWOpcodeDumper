@@ -36,6 +36,7 @@ private:
     std::ofstream stream;
 };
 
+struct CMSGOP;
 struct JamData;
 class SQLiteWriter
 {
@@ -43,7 +44,7 @@ public:
     SQLiteWriter(const char* filePath);
     ~SQLiteWriter();
 
-    void addCMSG(int opcode, int vTable, int cliPut);
+    void addCMSG(const CMSGOP &cmsgData, int opcode);
     void addSMSG(JamData &jamData, int handler);
 private:
     sqlite3* db;
@@ -54,7 +55,8 @@ private:
         "("
         "opcode INTEGER PRIMARY KEY,"
         "vTable INTEGER,"
-        "cliPut INTEGER"
+        "cliPut INTEGER,"
+        "caller INTEGER"
         ");";
     char* createSMSG =
         "CREATE TABLE SMSG"
@@ -66,7 +68,7 @@ private:
         ");";
     char* CMSGInsertQuery =
         "INSERT INTO CMSG "
-        "VALUES (?,?,?);";
+        "VALUES (?,?,?,?);";
     char* SMSGInsertQuery =
         "INSERT into SMSG "
         "VALUES (?,?,?,?);";

@@ -117,12 +117,13 @@ SQLiteWriter::~SQLiteWriter()
     sqlite3_close_v2(db);
 }
 
-void SQLiteWriter::addCMSG(int opcode, int vTable, int cliPut)
+void SQLiteWriter::addCMSG(const CMSGOP &cmsgData, int opcode)
 {
     // Bind values to statement
     sqlite3_bind_int(CMSGstmt, 1, opcode);
-    sqlite3_bind_int(CMSGstmt, 2, vTable);
-    sqlite3_bind_int(CMSGstmt, 3, cliPut);
+    sqlite3_bind_int(CMSGstmt, 2, FIX_ADDR(cmsgData.offset));
+    sqlite3_bind_int(CMSGstmt, 3, FIX_ADDR(cmsgData.putData));
+    sqlite3_bind_int(CMSGstmt, 4, FIX_ADDR(cmsgData.caller));
 
     // Run statement
     sqlite3_step(CMSGstmt);
