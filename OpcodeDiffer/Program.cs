@@ -13,33 +13,37 @@ namespace OpcodeDiffer
     {
         public static Dictionary<uint, uint> OpcodeToFileOffset = new Dictionary<uint, uint>();
 
-        public static BinaryReader ClientStream { get; private set; }
-        public static Stream BaseStream { get { return ClientStream.BaseStream; } }
-        public static byte[] ClientBytes { get; private set; }
-        public static UnmanagedBuffer Disasm { get; private set; }
-        public static BinDiff FuncDiff { get; private set; }
-        public static OpcodeTable OpTable { get; private set; }
+        public static BinDiff funcDiff { get; private set; }
+        public static NameDB nameDB { get; private set; }
 
         static void Main(string[] args)
         {
-            if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
-            {
-                Console.WriteLine(">> Opening Diff...");
-                FuncDiff = new BinDiff(Config.BinDiff);
-                if (!FuncDiff.openConnection())
-                {
-                    Console.WriteLine(">> Failed to open diff!");
-                    return;
-                }
+            //Opcodes.populateFromWPP();
+            nameDB = new NameDB(String.Concat(Directory.GetCurrentDirectory(), "/Resources/Names.db"));
+            nameDB.OpenConnection();
 
-                Console.WriteLine(">> Opening OpcodeTable...");
-                OpTable = new OpcodeTable(Config.Opcode);
-                if (!OpTable.openConnection())
-                {
-                    Console.WriteLine(">> Failed to open OpcodeTable!");
-                    return;
-                }
-            }
+            Logger.WriteConsoleLine(nameDB.GetNameFromHandlerSMSG(10014047));
+
+            Console.ReadKey();
+            //if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
+            //{
+            //    Console.WriteLine(">> Opening Diff...");
+            //    funcDiff = new BinDiff(Config.BinDiff);
+            //    if (!funcDiff.OpenConnection())
+            //    {
+            //        Console.WriteLine(">> Failed to open diff!");
+            //        return;
+            //    }
+
+            //    Console.WriteLine(">> Opening OpcodeTable...");
+            //    OpTable = new OpcodeTable(Config.Opcode);
+            //    if (!OpTable.OpenConnection())
+            //    {
+            //        Console.WriteLine(">> Failed to open OpcodeTable!");
+            //        return;
+            //    }
+            //}
+
         }
     }
 }

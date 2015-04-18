@@ -64,7 +64,7 @@ private:
         "opcode INTEGER PRIMARY KEY,"
         "ctor INTEGER,"
         "callHandler INTEGER,"
-        "Handler INTEGER"
+        "handler INTEGER"
         ");";
     char* CMSGInsertQuery =
         "INSERT INTO CMSG "
