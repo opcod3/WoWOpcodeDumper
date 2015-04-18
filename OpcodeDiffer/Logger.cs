@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace OpcodeDiffer
 {
-    class Logger
+    /// <summary>
+    /// Description of Logger.
+    /// </summary>
+    public static class Logger
     {
         private static StreamWriter outputFile = null;
 
@@ -31,7 +30,7 @@ namespace OpcodeDiffer
         {
             Console.WriteLine(str, obj);
         }
-        
+
         public static void WriteLine()
         {
             WriteLine(String.Empty);
