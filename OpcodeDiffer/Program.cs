@@ -22,7 +22,7 @@ namespace OpcodeDiffer
             nameDB = new NameDB(String.Concat(Directory.GetCurrentDirectory(), "/Resources/Names.db"));
             nameDB.OpenConnection();
 
-            Logger.WriteConsoleLine(nameDB.GetNameFromHandlerSMSG(10014047));
+            Logger.WriteConsoleLine(nameDB.SMSG_GetNameFromHandler(10014047));
 
             Console.ReadKey();
             //if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
