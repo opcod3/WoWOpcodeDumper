@@ -340,7 +340,7 @@ void main()
 
     // Turn dtor address to a byte array
     uint8 dtorAddr[4];
-    uint8* dtorAddr_i = (uint8*)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
+    uint32* dtorAddr_i = (uint32*)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
     memcpy(dtorAddr, &dtorAddr_i, sizeof(dtorAddr));
 
     // Find all occurrences of the dtor 
@@ -348,30 +348,33 @@ void main()
     std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, dtorAddr, sizeof(dtorAddr), "pppp");
 
     // Go through all occurrences of the dtor
-    std::unordered_map<uint8, CMSGOP> cmsgMap;
+    std::unordered_map<uint32, CMSGOP> cmsgMap;
     for (std::list<void*> ::const_iterator dtor = cmsgOpList.begin(); dtor != cmsgOpList.end(); )
 	{
         // Get address of cliPutWithMsgId
-        uint8* cliPutWithMsgId = (uint8*)((uint8)*dtor - 4);
+        uint32* cliPutWithMsgId = (uint32*)(((uint32)*dtor) - 4);
 
         // Check if cliPutWithMsgId is within the main module
-        if ((int)cliPutWithMsgId < GetMainModuleAddress() || (int)cliPutWithMsgId > (GetMainModuleAddress() + GetMainModuleSize()))
+        if ((int)*cliPutWithMsgId < GetMainModuleAddress() || (int)*cliPutWithMsgId > (GetMainModuleAddress() + GetMainModuleSize()))
         {
             dtor = cmsgOpList.erase(dtor);
             continue;
         }
 
+
+        
         // Check if cliPutWithMsgId pushes opcode as an argument
-        if ((cliPutWithMsgId[9] == 0x68 && cliPutWithMsgId[0xE] == 0xE8) || // push [OPCODE](DWORD) call [CDataStore__PutUInt32]
-            (cliPutWithMsgId[9] == 0x6A && cliPutWithMsgId[0xB] == 0xE8))   // push [OPCODE](BYTE) call [CDataStore__PutUInt32]
+        uint8* cliPutWithMsgIdAddr = (uint8*)*cliPutWithMsgId;
+        if ((cliPutWithMsgIdAddr[9] == 0x68 && cliPutWithMsgIdAddr[0xE] == 0xE8) || // push [OPCODE](DWORD) call [CDataStore__PutUInt32]
+            (cliPutWithMsgIdAddr[9] == 0x6A && cliPutWithMsgIdAddr[0xB] == 0xE8))   // push [OPCODE](BYTE) call [CDataStore__PutUInt32]
         {
             // Get opcode data from vTable
             CMSGOP op;
-            op.offset = ((uint8)*dtor) - 12;
-            op.putData = ((uint8)*dtor) - 8;
-            op.putOpcode = ((uint8)*dtor) - 4;
-            op.caller = (uint8)getCMSGCaller((uint8*)op.offset);
-            uint8 opcode;
+            op.offset = ((uint32)*dtor) - 12;
+            op.putData = ((uint32)*dtor) - 8;
+            op.putOpcode = ((uint32)*dtor) - 4;
+            op.caller = (uint32)getCMSGCaller((uint8*)op.offset);
+            uint32 opcode;
             if (cliPutWithMsgId[9] == 0x6A)
                 opcode = cliPutWithMsgId[0xA];
             else
@@ -393,12 +396,12 @@ void main()
     // Log all CMSG opcodes to text file
     for (int i = 0; i < 0x1FFF; i++)
     {
-        std::unordered_map<uint8, CMSGOP>::const_iterator cmsg = cmsgMap.find(i);
+        std::unordered_map<uint32, CMSGOP>::const_iterator cmsg = cmsgMap.find(i);
 
         if (cmsg == cmsgMap.end())
             continue;
 
-        output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", cmsg->first, cmsg->first, FIX_ADDR(cmsg->second.offset), FIX_ADDR(*(uint8*)cmsg->second.putData));
+        output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", cmsg->first, cmsg->first, FIX_ADDR(cmsg->second.offset), FIX_ADDR(*(uint32*)cmsg->second.putData));
         dbWriter.addCMSG(cmsg);
     }
 

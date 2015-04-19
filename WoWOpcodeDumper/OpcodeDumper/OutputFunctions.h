@@ -44,7 +44,7 @@ public:
     SQLiteWriter(const char* filePath, int clientBuild);
     ~SQLiteWriter();
 
-    void addCMSG(std::unordered_map<uint8, CMSGOP>::const_iterator &opcodeData);
+    void addCMSG(std::unordered_map<uint32, CMSGOP>::const_iterator &opcodeData);
     void addSMSG(JamData &jamData, int handler);
 private:
     sqlite3* db;

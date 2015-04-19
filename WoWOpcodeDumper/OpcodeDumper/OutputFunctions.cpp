@@ -140,7 +140,7 @@ SQLiteWriter::~SQLiteWriter()
     sqlite3_close_v2(db);
 }
 
-void SQLiteWriter::addCMSG(std::unordered_map<uint8, CMSGOP>::const_iterator &opcodeData)
+void SQLiteWriter::addCMSG(std::unordered_map<uint32, CMSGOP>::const_iterator &opcodeData)
 {
     // Bind values to statement
     sqlite3_bind_int(CMSGstmt, 1, opcodeData->first);
