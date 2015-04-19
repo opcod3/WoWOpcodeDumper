@@ -1,6 +1,6 @@
 #pragma once
 #include "Common.h"
 
-extern HMODULE GetMainModule();
+#define GetMainModule() GetModuleHandle(NULL)
 extern int GetMainModuleSize();
 extern int GetMainModuleAddress();

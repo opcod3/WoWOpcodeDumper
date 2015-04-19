@@ -70,7 +70,7 @@ void InitializeDebugLoggers(std::string path)
         assert("Unable to create output directory");
 }
 
-SQLiteWriter::SQLiteWriter(const char* filePath)
+SQLiteWriter::SQLiteWriter(const char* filePath, int clientBuild)
 {
     // Delete DB if it already exists
     DeleteFileA(filePath);
@@ -82,32 +82,55 @@ SQLiteWriter::SQLiteWriter(const char* filePath)
         assert("Failed to open SQlite databas");
     }
 
-    // Create CMSG and SMSG tables in DB
+    // Create Version, CMSG and SMSG tables in DB
     char* errmsg;
     if (sqlite3_exec(db, createCMSG, NULL, NULL, &errmsg))
     {
-        LOG_SHIFT("SQLITE ERROR: %s", errmsg);
+        LOG_SHIFT("SQLITE ERROR(createCMSG): %s", errmsg);
         assert("Failed to create CMSG table in SQLite database");
     }
 
     if (sqlite3_exec(db, createSMSG, NULL, NULL, &errmsg))
     {
-        LOG_SHIFT("SQLITE ERROR: %s", errmsg);
+        LOG_SHIFT("SQLITE ERROR(createSMSG): %s", errmsg);
         assert("Failed to create SMSG table in SQLite database");
+    }
+    if (sqlite3_exec(db, createVersion, NULL, NULL, &errmsg))
+    {
+        LOG_SHIFT("SQLITE ERROR(createVersion): %s", errmsg);
+        assert("Failed to create Version table in SQLite database");
     }
 
     // Create statements to insert data into tables
     int err;
     if (err = sqlite3_prepare_v2(db, CMSGInsertQuery, -1, &CMSGstmt, NULL))
     {
-        LOG_SHIFT("SQLITE ERROR: %s", sqlite3_errstr(err));
+        LOG_SHIFT("SQLITE ERROR(CMSGstmt): %s", sqlite3_errstr(err));
         assert("Unable to prepare CMSG insert statement");
     }
     if (err = sqlite3_prepare_v2(db, SMSGInsertQuery, -1, &SMSGstmt, NULL))
     {
-        LOG_SHIFT("SQLITE ERROR: %s", sqlite3_errstr(err));
+        LOG_SHIFT("SQLITE ERROR(SMSGstmt): %s", sqlite3_errstr(err));
         assert("Unable to prepare SMSG insert statement");
     }
+
+    // Write version info to the Version table
+    sqlite3_stmt *versionStmt;
+    if (err = sqlite3_prepare_v2(db, VersionInsertQuery, -1, &versionStmt, NULL))
+    {
+        LOG_SHIFT("SQLITE ERROR(versionStmt): %s", sqlite3_errstr(err));
+        assert("Unable to prepare Version create statement");
+    }
+    
+    // Bind data to version statement
+    sqlite3_bind_int(versionStmt, 1, clientBuild);
+    sqlite3_bind_double(versionStmt, 2, DB_VERSION);
+
+    // Run statement
+    sqlite3_step(versionStmt);
+
+    // Delete statement
+    sqlite3_finalize(versionStmt);
 }
 
 SQLiteWriter::~SQLiteWriter()

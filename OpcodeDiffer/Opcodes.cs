@@ -46,25 +46,6 @@ namespace OpcodeDiffer
             return true;
         }
 
-        //public static string GetOpcodeNameForServer(uint opcode, uint Handler)
-        //{
-        //    string output = SMSG.FirstOrDefault(p => p.Value == opcode).Key;
-        //    //if (Config.BinDiff != string.Empty && output == null)
-        //    //    output = Program.OpTable.getSMSGNameFromHandler(Program.FuncDiff.getOldFunction(Handler)); // SMSG diff is not working yet
-
-        //    return output;
-        //}
-
-        //public static string GetOpcodeNameForClient(uint opcode, uint Ctor)
-        //{
-        //    string output = CMSG.FirstOrDefault(p => p.Value == opcode).Key;
-        //    if (Config.BinDiff != string.Empty && output == null)
-        //        output = Program.OpTable.getCMSGNameFromCtor(Program.FuncDiff.getOldFunction(Ctor));
-
-        //    return output;
-
-        //}
-
         public static Dictionary<int, string> CMSG = new Dictionary<int, string>();
         public static Dictionary<int, string> SMSG = new Dictionary<int, string>();
     }

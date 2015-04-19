@@ -163,39 +163,29 @@ uint8* getCMSGCaller(uint8* vTable)
 
     uint8* xRef = (uint8*)FindPattern(vTableAddr, sizeof(vTableAddr), "pppp");
 
+    // Get start of the function
+    // TO-DO optimize this
     uint8* callerFunc = xRef - 1;
-    bool found = false;
-    while (!found)
+    while (true)
     {
         if (callerFunc[0] == caller1[0])
         {
             if (callerFunc[1] == caller1[1])
-            {
-                found = true;
-                break;
-            }
-                
+                break;     
         }
         
         if (callerFunc[0] == caller2[0])
         {
             if (callerFunc[1] == caller2[1])
                 if (callerFunc[2] == caller2[2])
-                {
-                    found = true;
                     break;
-                }
         }
 
         if (callerFunc[0] == caller3[0])
         {
             if (callerFunc[1] == caller3[1])
                 if (callerFunc[2] == caller3[2])
-                {
-                    found = true;
-                    break;
-                }
-                    
+                    break;          
         }
 
         callerFunc -= 1;
@@ -228,7 +218,7 @@ void main()
     LOG_DEBUG("Detected Build: %i", Build);
 
     // Open SQLite DB writer
-    SQLiteWriter dbWriter((WorkingDir.append("\\Dump.db").c_str()));
+    SQLiteWriter dbWriter((WorkingDir.append("\\Dump.db").c_str()), Build);
 
     FillCallList();
 
@@ -354,16 +344,18 @@ void main()
     memcpy(dtorAddr, (uint8*)&dtorAddr_i, sizeof(dtorAddr));
 
     // Find all occurrences of the dtor 
-    // TO-DO: figure out what 0x800000 is
+    // 0x800000 seems to be a random/estimated value before which vTables don't occur
     std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, dtorAddr, sizeof(dtorAddr), "pppp");
 
     // Go through all occurrences of the dtor
     std::unordered_map<int, CMSGOP> cmsgMap;
     for (std::list<void*> ::const_iterator iter = cmsgOpList.begin(); iter != cmsgOpList.end(); )
 	{
-        int* bs = (int*)(((int)*iter) - 4);
-        int address = *bs;
+        // Get address of cliPutWithMsgId
+        uint8* cliPutWithMsgId = (uint8*)(((uint8)*iter) - 4);
+        int address = *cliPutWithMsgId;
 
+        // Check if cliPutWithMsgId is within the main module
         if (address < GetMainModuleAddress() || address > (GetMainModuleAddress() + GetMainModuleSize()))
         {
             iter = cmsgOpList.erase(iter);

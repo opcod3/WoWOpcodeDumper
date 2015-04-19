@@ -41,7 +41,7 @@ struct JamData;
 class SQLiteWriter
 {
 public:
-    SQLiteWriter(const char* filePath);
+    SQLiteWriter(const char* filePath, int clientBuild);
     ~SQLiteWriter();
 
     void addCMSG(const CMSGOP &cmsgData, int opcode);
@@ -50,6 +50,8 @@ private:
     sqlite3* db;
     sqlite3_stmt* CMSGstmt;
     sqlite3_stmt* SMSGstmt;
+
+    // SQLite text Queries
     char* createCMSG =
         "CREATE TABLE CMSG"
         "("
@@ -66,12 +68,21 @@ private:
         "callHandler INTEGER,"
         "handler INTEGER"
         ");";
+    char* createVersion =
+        "CREATE TABLE Version"
+        "("
+        "clientBuild INTEGER,"
+        "dumperVersion REAL"
+        ");";
     char* CMSGInsertQuery =
         "INSERT INTO CMSG "
         "VALUES (?,?,?,?);";
     char* SMSGInsertQuery =
         "INSERT into SMSG "
         "VALUES (?,?,?,?);";
+    char* VersionInsertQuery =
+        "INSERT into Version "
+        "VALUES (?,?);";
 };
 
 extern FileWriter* shiftDebugLogger;
