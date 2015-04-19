@@ -71,7 +71,7 @@ namespace OpcodeDiffer
 
                     var opcodeName = rgxResult.Groups[1].Value;
                     var opcodeValue = Convert.ToInt32(rgxResult.Groups[2].Value, 16);
-                    if (opcodeName.Contains("CMSG_temp"))
+                    if (opcodeName.Contains("CMSG"))
                         CMSG_temp.Add(opcodeValue, opcodeName);
                     else
                         SMSG_temp.Add(opcodeValue, opcodeName);
