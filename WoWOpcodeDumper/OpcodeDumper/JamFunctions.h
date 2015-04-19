@@ -63,10 +63,10 @@ struct JamData
 
 struct CMSGOP
 {
-    int offset;
-    int putData;
-    int putOpcode;
-    int caller;
+    uint8 offset;
+    uint8 putData;
+    uint8 putOpcode;
+    uint8 caller;
 };
 
 typedef std::unordered_map<int, JamData*> OpcodeMap;

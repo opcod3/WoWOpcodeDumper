@@ -140,13 +140,13 @@ SQLiteWriter::~SQLiteWriter()
     sqlite3_close_v2(db);
 }
 
-void SQLiteWriter::addCMSG(const CMSGOP &cmsgData, int opcode)
+void SQLiteWriter::addCMSG(std::unordered_map<int, CMSGOP>::const_iterator &opcodeData)
 {
     // Bind values to statement
-    sqlite3_bind_int(CMSGstmt, 1, opcode);
-    sqlite3_bind_int(CMSGstmt, 2, FIX_ADDR(cmsgData.offset));
-    sqlite3_bind_int(CMSGstmt, 3, FIX_ADDR(cmsgData.putData));
-    sqlite3_bind_int(CMSGstmt, 4, FIX_ADDR(cmsgData.caller));
+    sqlite3_bind_int(CMSGstmt, 1, opcodeData->first);
+    sqlite3_bind_int(CMSGstmt, 2, FIX_ADDR(opcodeData->second.offset));
+    sqlite3_bind_int(CMSGstmt, 3, FIX_ADDR(opcodeData->second.putData));
+    sqlite3_bind_int(CMSGstmt, 4, FIX_ADDR(opcodeData->second.caller));
 
     // Run statement
     sqlite3_step(CMSGstmt);

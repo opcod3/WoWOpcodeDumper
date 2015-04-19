@@ -324,7 +324,7 @@ void main()
     }
 
 	// CMSG
-
+    //
     // Pattern of the destructor used in CMSGs
     uint8 dtorPattern[] = {   0x55,                                // push     ebp
 		                      0x8B, 0xEC,                          // mov      ebo, esp
@@ -340,63 +340,66 @@ void main()
 
     // Turn dtor address to a byte array
     uint8 dtorAddr[4];
-    int dtorAddr_i = (int)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
-    memcpy(dtorAddr, (uint8*)&dtorAddr_i, sizeof(dtorAddr));
+    uint8* dtorAddr_i = (uint8*)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
+    memcpy(dtorAddr, &dtorAddr_i, sizeof(dtorAddr));
 
     // Find all occurrences of the dtor 
     // 0x800000 seems to be a random/estimated value before which vTables don't occur
     std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, dtorAddr, sizeof(dtorAddr), "pppp");
 
     // Go through all occurrences of the dtor
-    std::unordered_map<int, CMSGOP> cmsgMap;
-    for (std::list<void*> ::const_iterator iter = cmsgOpList.begin(); iter != cmsgOpList.end(); )
+    std::unordered_map<uint8, CMSGOP> cmsgMap;
+    for (std::list<void*> ::const_iterator dtor = cmsgOpList.begin(); dtor != cmsgOpList.end(); )
 	{
         // Get address of cliPutWithMsgId
-        uint8* cliPutWithMsgId = (uint8*)(((uint8)*iter) - 4);
-        int address = *cliPutWithMsgId;
+        uint8* cliPutWithMsgId = (uint8*)((uint8)*dtor - 4);
 
         // Check if cliPutWithMsgId is within the main module
-        if (address < GetMainModuleAddress() || address > (GetMainModuleAddress() + GetMainModuleSize()))
+        if ((int)cliPutWithMsgId < GetMainModuleAddress() || (int)cliPutWithMsgId > (GetMainModuleAddress() + GetMainModuleSize()))
         {
-            iter = cmsgOpList.erase(iter);
+            dtor = cmsgOpList.erase(dtor);
             continue;
         }
 
-        uint8* addr = (uint8*)address;
-        if ((addr[9] == 0x68 && addr[0xE] == 0xE8) || (addr[9] == 0x6A && addr[0xB] == 0xE8))
+        // Check if cliPutWithMsgId pushes opcode as an argument
+        if ((cliPutWithMsgId[9] == 0x68 && cliPutWithMsgId[0xE] == 0xE8) || // push [OPCODE](DWORD) call [CDataStore__PutUInt32]
+            (cliPutWithMsgId[9] == 0x6A && cliPutWithMsgId[0xB] == 0xE8))   // push [OPCODE](BYTE) call [CDataStore__PutUInt32]
         {
+            // Get opcode data from vTable
             CMSGOP op;
-            op.offset = ((int)*iter) - 12;
-            op.putData = ((int)*iter) - 8;
-            op.putOpcode = ((int)*iter) - 4;
-            op.caller = (int)getCMSGCaller((uint8*)op.offset);
-            int opcode;
-            if (addr[9] == 0x6A)
-                opcode = addr[0xA];
+            op.offset = ((uint8)*dtor) - 12;
+            op.putData = ((uint8)*dtor) - 8;
+            op.putOpcode = ((uint8)*dtor) - 4;
+            op.caller = (uint8)getCMSGCaller((uint8*)op.offset);
+            uint8 opcode;
+            if (cliPutWithMsgId[9] == 0x6A)
+                opcode = cliPutWithMsgId[0xA];
             else
-                memcpy((uint8*)&opcode, &(addr[0xA]), sizeof(int));
+                memcpy((uint8*)&opcode, &(cliPutWithMsgId[0xA]), sizeof(int));
             cmsgMap[opcode] = op;
-            iter++;
+            dtor++;
             continue;
         }
 
-        iter = cmsgOpList.erase(iter);
+        dtor = cmsgOpList.erase(dtor);
         continue;
     }
 
+    // Write table header for CMSG
     output->WriteString("---------------------------------------------");
     output->WriteString("  Hex  |  Dec  |  VTable  |  CliPut  | Type |");
     output->WriteString("---------------------------------------------");
     
+    // Log all CMSG opcodes to text file
     for (int i = 0; i < 0x1FFF; i++)
     {
-        std::unordered_map<int, CMSGOP>::const_iterator iter = cmsgMap.find(i);
+        std::unordered_map<uint8, CMSGOP>::const_iterator cmsg = cmsgMap.find(i);
 
-        if (iter == cmsgMap.end())
+        if (cmsg == cmsgMap.end())
             continue;
 
-        output->WriteString("0x%04X   %04i   %08X   %08X   CMSG   %08X", iter->first, iter->first, FIX_ADDR(iter->second.offset), FIX_ADDR(*(int*)iter->second.putData), FIX_ADDR(iter->second.caller));
-        dbWriter.addCMSG(iter->second, iter->first);
+        output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", cmsg->first, cmsg->first, FIX_ADDR(cmsg->second.offset), FIX_ADDR(*(uint8*)cmsg->second.putData));
+        dbWriter.addCMSG(cmsg);
     }
 
     int totalCount = 0;
