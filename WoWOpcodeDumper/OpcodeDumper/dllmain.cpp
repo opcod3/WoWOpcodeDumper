@@ -360,9 +360,7 @@ void main()
             dtor = cmsgOpList.erase(dtor);
             continue;
         }
-
-
-        
+    
         // Check if cliPutWithMsgId pushes opcode as an argument
         uint8* cliPutWithMsgIdAddr = (uint8*)*cliPutWithMsgId;
         if ((cliPutWithMsgIdAddr[9] == 0x68 && cliPutWithMsgIdAddr[0xE] == 0xE8) || // push [OPCODE](DWORD) call [CDataStore__PutUInt32]
@@ -375,10 +373,10 @@ void main()
             op.putOpcode = ((uint32)*dtor) - 4;
             op.caller = (uint32)getCMSGCaller((uint8*)op.offset);
             uint32 opcode;
-            if (cliPutWithMsgId[9] == 0x6A)
-                opcode = cliPutWithMsgId[0xA];
+            if (cliPutWithMsgIdAddr[9] == 0x6A)
+                opcode = cliPutWithMsgIdAddr[0xA];
             else
-                memcpy((uint8*)&opcode, &(cliPutWithMsgId[0xA]), sizeof(int));
+                memcpy((uint8*)&opcode, &(cliPutWithMsgIdAddr[0xA]), sizeof(uint32));
             cmsgMap[opcode] = op;
             dtor++;
             continue;
