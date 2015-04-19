@@ -20,7 +20,6 @@ namespace OpcodeDiffer
         {
             //Opcodes.populateFromWPP();
             nameDB = new NameDB(String.Concat(Directory.GetCurrentDirectory(), "/Resources/Names.db"));
-            nameDB.OpenConnection();
 
             Logger.WriteConsoleLine(nameDB.SMSG_GetNameFromHandler(10014047));
 
