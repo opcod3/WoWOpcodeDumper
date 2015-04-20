@@ -2,8 +2,9 @@
 
 bool GroupVtable::IsJam(__int16 opcode)
 {
-	pIsJam _isJam = (pIsJam)(isJam);
-	return _isJam(opcode);
+    pIsJam _isJam = (pIsJam)(isJam);
+
+    return _isJam(opcode);
 }
 
 bool __thiscall GroupVtable::IsInstanceServer(uint32 opcode)
@@ -11,6 +12,7 @@ bool __thiscall GroupVtable::IsInstanceServer(uint32 opcode)
 	if (!isInstanceServer)
 		return false;
 	pIsInstanceServer _isInstance = (pIsInstanceServer)(isInstanceServer);
+
 	return _isInstance(opcode);
 }
 
@@ -26,6 +28,7 @@ int* GroupVtable::GetRealCallFunction()
 {
     uint8 pattern[] = {0xE8, 0x00, 0x00, 0x00, 0x00, 0x5D};
     int* ptr = (int*)((int)FindPattern((uint8*)Exec, 0x20, pattern, sizeof(pattern), "paaaap") + 1);
+
     return (int*)((int)ptr + *ptr + 4);
 }
 
@@ -40,7 +43,7 @@ int GroupVtable::GetRealCallFunctionLen()
     {
         pattern[0] = 0x5B;
         addr = (int)FindPattern(func, 30000, pattern, sizeof(pattern), "pppp");
-
     }
+
     return (addr + sizeof(pattern) - (int)func);
 }
