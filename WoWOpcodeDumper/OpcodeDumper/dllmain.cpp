@@ -14,18 +14,17 @@ FileWriter* output = nullptr;
 
 void FillCallList()
 {
-	uint8 list[] = { 0xC7, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	std::string options = "xx????????";
-	std::list<void*> _list = FindMultiplePatterns(list, sizeof(list), options);
+    uint8 list[] = { 0xC7, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    std::string options = "xx????????";
+    std::list<void*> _list = FindMultiplePatterns(list, sizeof(list), options);
 
-	for (std::list<void*>::const_iterator iter = _list.begin(); iter != _list.end(); iter++)
-	{
-		CallEntry* callEntry = new CallEntry();
-		callEntry->addr = (int*)*(int*)(((int)*iter) + 2);
-		callEntry->setValue = *(int*)(((int)*iter) + 6);
-		CallList.push_back(callEntry);
-
-	}
+    for (std::list<void*>::const_iterator iter = _list.begin(); iter != _list.end(); iter++)
+    {
+        CallEntry* callEntry = new CallEntry();
+        callEntry->addr = (int*)*(int*)(((int)*iter) + 2);
+        callEntry->setValue = *(int*)(((int)*iter) + 6);
+        CallList.push_back(callEntry);
+    }
 }
 
 JamData GetData(uint8* addr)
@@ -102,65 +101,69 @@ JamData GetData(uint8* addr)
 
 int FindApHandler(int* addr)
 {
-	for (std::list<CallEntry*>::const_iterator iter = CallList.begin(); iter != CallList.end(); iter++)
-	{
-		int* thisAddr = (*iter)->addr;
+    for (std::list<CallEntry*>::const_iterator iter = CallList.begin(); iter != CallList.end(); iter++)
+    {
+        int* thisAddr = (*iter)->addr;
+        if (thisAddr == addr)
+            return (int)(*iter)->setValue;
+    }
 
-		if (thisAddr == addr)
-			return (int)(*iter)->setValue;
-	}
-	return 0;
+    return 0;
 }
 
 void CalledHandler(int addr)
 {
-	JamData* data = opcodeMap[addr];
-	data->opcode = lastOpcode;
-	int callAddr = (int)data->GetCallHandlerAddr();
-	CallHandlerList.push_back(callAddr);
-	return;
+    JamData* data = opcodeMap[addr];
+    data->opcode = lastOpcode;
+    int callAddr = (int)data->GetCallHandlerAddr();
+    CallHandlerList.push_back(callAddr);
+
+    return;
 }
 
 DWORD RemoveProtect(char* ptr, int len)
 {
-	DWORD oldProtect;
-	VirtualProtect(ptr, len, PAGE_EXECUTE_READWRITE, &oldProtect);
-	return oldProtect;
+    DWORD oldProtect;
+    VirtualProtect(ptr, len, PAGE_EXECUTE_READWRITE, &oldProtect);
+
+    return oldProtect;
 }
 
 DWORD RemoveProtectDataStore(char* ptr, int len)
 {
-	DWORD oldProtect;
-	VirtualProtect(ptr, len, PAGE_READWRITE, &oldProtect);
-	return oldProtect;
+    DWORD oldProtect;
+    VirtualProtect(ptr, len, PAGE_READWRITE, &oldProtect);
+
+    return oldProtect;
 }
 
 // Generate Handler data. 
 void FillHandler(JamData& data)
 {
-	uint8 buffer[60];
-	memset(buffer, (char)0x90, sizeof(buffer));
-	buffer[0] = 0x68; // push
-	memcpy(&buffer[1], &data.addr, sizeof(int));
-	buffer[5] = 0xE8; // call
-	int memory = ((int)&CalledHandler - (int)(data.addr + 5 + 5));
-	memcpy(&buffer[6], &memory, sizeof(int));
-	RemoveProtect((char*)data.addr, data.len);
-	memcpy((char*)data.addr, &buffer[0], data.len);
+    uint8 buffer[60];
+    memset(buffer, (char)0x90, sizeof(buffer));
+    buffer[0] = 0x68; // push
+    memcpy(&buffer[1], &data.addr, sizeof(int));
+    buffer[5] = 0xE8; // call
+    int memory = ((int)&CalledHandler - (int)(data.addr + 5 + 5));
+    memcpy(&buffer[6], &memory, sizeof(int));
+    RemoveProtect((char*)data.addr, data.len);
+    memcpy((char*)data.addr, &buffer[0], data.len);
 }
 
 bool IsCMSG(void* argAddr)
 {
-	int* bs = (int*)(((int)argAddr) - 4);
-	int address = *bs;
+    int* bs = (int*)(((int)argAddr) - 4);
+    int address = *bs;
 
-	if (address < GetMainModuleAddress() || address >(GetMainModuleAddress() + GetMainModuleSize()))
-		return false;
+    if (address < GetMainModuleAddress() || address >(GetMainModuleAddress() + GetMainModuleSize()))
+        return false;
 
-	uint8* addr = (uint8*)address;
-	if (addr[9] == 0x68 && (addr[0xE] == 0xE8 || addr[0xE] == 0x6A))
-		return true;
-	return false;
+    uint8* addr = (uint8*)address;
+    if (addr[9] == 0x68 && (addr[0xE] == 0xE8 || addr[0xE] == 0x6A))
+        return true;
+
+    return false;
 }
 
 uint8* getCMSGCaller(uint8* vTable)
@@ -252,8 +255,8 @@ void main()
     possibleJamPatterns.push_back({ 0xFF, 0x73, 0x0C });
     possibleJamPatterns.push_back({ 0xFF, 0x75, 0x0C });
 
-	// SMSG
-    LOG_DEBUG("Dumping Groups");
+    // SMSG
+    LOG_DEBUG("Dumping JAM Groups");
     for (int i = 0; i < groupCount; i++)
     {
         RawGroupVtable* rawTable = (RawGroupVtable*)((int32**)*addr)[i];
@@ -338,15 +341,15 @@ void main()
 	// CMSG
     //
     // Pattern of the destructor used in CMSGs
-    uint8 dtorPattern[] = {   0x55,                                // push     ebp
-		                      0x8B, 0xEC,                          // mov      ebo, esp
-		                      0x8B, 0x45, 0x08,                    // mov      eax, [ebp+a1]
-		                      0x83, 0x60, 0x04, 0x00,              // and      dword ptr [eax+4], 0
-		                      0x83, 0x60, 0x08, 0x00,              // and      dword ptr [eax+8], 0
-		                      0xC7, 0x00, 0x00, 0x00, 0x00, 0x00,  // mov      dword ptr [eax], offset unk_XXXXXX
-		                      0x5D,                                // pop      ebp
-		                      0xC2, 0x04, 0x00                     // retn     4
-                            };
+    uint8 dtorPattern[] = { 0x55,                                // push     ebp
+                            0x8B, 0xEC,                          // mov      ebo, esp
+                            0x8B, 0x45, 0x08,                    // mov      eax, [ebp+a1]
+                            0x83, 0x60, 0x04, 0x00,              // and      dword ptr [eax+4], 0
+                            0x83, 0x60, 0x08, 0x00,              // and      dword ptr [eax+8], 0
+                            0xC7, 0x00, 0x00, 0x00, 0x00, 0x00,  // mov      dword ptr [eax], offset unk_XXXXXX
+                            0x5D,                                // pop      ebp
+                            0xC2, 0x04, 0x00                     // retn     4
+                          };
 
     std::string patternOp = "ppppppppppppppppaaaapppp";
 
@@ -453,30 +456,30 @@ std::string GetDirectory(std::string filename)
 {
     std::string directory = "";
     const size_t last_slash_idx = filename.rfind('\\');
+
     if (std::string::npos != last_slash_idx)
-    {
         directory = filename.substr(0, last_slash_idx);
-    }
+
     return directory;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
+    switch (ul_reason_for_call)
     {
-        char module[2024];
-        //currentModule = hModule;
-        GetModuleFileNameA(hModule, module, 2024);
-        WorkingDir = GetDirectory(module);
-        ModulePath = WorkingDir;
-        CreateThread(0, 0, (LPTHREAD_START_ROUTINE)&main, 0, 0, 0);
+        case DLL_PROCESS_ATTACH:
+        {
+            char module[2024];
+            //currentModule = hModule;
+            GetModuleFileNameA(hModule, module, 2024);
+            WorkingDir = GetDirectory(module);
+            ModulePath = WorkingDir;
+            CreateThread(0, 0, (LPTHREAD_START_ROUTINE)&main, 0, 0, 0);
+        }
+        case DLL_THREAD_ATTACH:
+        case DLL_THREAD_DETACH:
+        case DLL_PROCESS_DETACH:
+        break;
     }
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
+    return TRUE;
 };
