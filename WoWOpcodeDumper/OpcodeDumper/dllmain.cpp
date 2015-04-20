@@ -436,7 +436,6 @@ void main()
     delete output;
 #endif
     delete debugLogger;
-    delete shiftDebugLogger;
 
     for (int i = 0; i < groupCount; i++)
         delete groups[i];

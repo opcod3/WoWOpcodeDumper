@@ -2,7 +2,6 @@
 #include "GeneralFunctions.h"
 #include "JamFunctions.h"
 #include "ModuleFunctions.h"
-#include "NamingFunctions.h"
 #include "OutputFunctions.h"
 #include "PatternFunctions.h"
 
@@ -33,10 +32,8 @@ extern int Build;
 #define MAX_OPCODE 0x1FFF
 #define SHUTDOWN_TIMER 5
 #define FILENAME_DEBUG "debug.txt"
-#define FILENAME_SHIFT_DEBUG "shift_debug.txt"
 
 #define LOG_DEBUG debugLogger->WriteString
-#define LOG_SHIFT shiftDebugLogger->WriteString
 #define FIX_ADDR(addr)(addr - (int)GetModuleHandle(NULL) + 0x400000)
 
 // Comment this out to have the dll dump opcodes to a text file

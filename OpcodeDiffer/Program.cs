@@ -11,7 +11,8 @@ namespace OpcodeDiffer
 {
     class Program
     {
-        public static UInt32 MAX_OPCODE = 0xFFFF;
+        // Max opcode value is NOT static. Could change in big content patches, and expansions.
+        public static UInt32 MAX_OPCODE = 0x1FFF;
 
         public static DiffDB funcDiff { get; private set; }
         public static NameDB nameDB { get; private set; }

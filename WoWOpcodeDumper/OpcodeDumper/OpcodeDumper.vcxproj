@@ -84,7 +84,6 @@
     <ClInclude Include="GeneralFunctions.h" />
     <ClInclude Include="JamFunctions.h" />
     <ClInclude Include="ModuleFunctions.h" />
-    <ClInclude Include="NamingFunctions.h" />
     <ClInclude Include="OutputFunctions.h" />
     <ClInclude Include="PatternFunctions.h" />
     <ClInclude Include="sqlite3.h" />
@@ -94,7 +93,6 @@
     <ClCompile Include="GeneralFunctions.cpp" />
     <ClCompile Include="JamFunctions.cpp" />
     <ClCompile Include="ModuleFunctions.cpp" />
-    <ClCompile Include="NamingFunctions.cpp" />
     <ClCompile Include="OutputFunctions.cpp" />
     <ClCompile Include="PatternFunctions.cpp" />
     <ClCompile Include="sqlite3.c" />

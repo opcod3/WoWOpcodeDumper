@@ -69,4 +69,13 @@ struct CMSGOP
     uint32 caller;
 };
 
+struct CallEntry
+{
+    int* addr;
+    int setValue;
+};
+
+extern std::list<CallEntry*> CallList;
+extern std::list<int> CallHandlerList;
+
 typedef std::unordered_map<int, JamData*> OpcodeMap;
