@@ -160,7 +160,7 @@ void SQLiteWriter::addSMSG(JamData &jamData, int handler)
     sqlite3_bind_int(SMSGstmt, 1, jamData.opcode);
     sqlite3_bind_int(SMSGstmt, 2, FIX_ADDR(jamData.ctor));
     sqlite3_bind_int(SMSGstmt, 3, FIX_ADDR(jamData.callHandler));
-    sqlite3_bind_int(SMSGstmt, 4, handler);
+    sqlite3_bind_int(SMSGstmt, 4, FIX_ADDR(handler));
 
     // Run statement
     sqlite3_step(SMSGstmt);
