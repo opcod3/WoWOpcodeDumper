@@ -63,10 +63,8 @@ namespace OpcodeDiffer
                 Logger.WriteLine(smsg.ToString());
             }
 
+            Console.WriteLine("Diff complete! Press any key to close...");
             Console.ReadKey();
-
-
-
 
             //if (Config.BinDiff != string.Empty && Config.Opcode != string.Empty)
             //{
