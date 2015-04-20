@@ -6,8 +6,11 @@ std::string ModulePath;
 std::list<int> CallHandlerList;
 std::list<CallEntry*> CallList;
 OpcodeMap opcodeMap;
-FileWriter* output = nullptr;
 int lastOpcode;
+
+#ifndef NO_TEXT_DUMP
+FileWriter* output = nullptr;
+#endif
 
 void FillCallList()
 {
@@ -208,7 +211,9 @@ void main()
     InitializeDebugLoggers(WorkingDir);
 
     // Init output file
+#ifndef NO_TEXT_DUMP
     output = new FileWriter("%s\\%i_opcode_dump.txt", WorkingDir.c_str(), Build);
+#endif
 
     InitializeConsole();
 
@@ -300,9 +305,11 @@ void main()
         else
         ConsoleWrite("duplicate %X %X", newOpcodeMap.find(iter->second->opcode)->second->addr, iter->second->addr);
 
+#ifndef NO_TEXT_DUMP
     output->WriteString("----------------------------------------------------------------------------");
     output->WriteString(" Hex  |  Dec  |  Ctor  | CallHandler |  Handler | Type |  JamGroup  | Name |");
     output->WriteString("----------------------------------------------------------------------------");
+#endif
 
     for (int i = 0; i < MAX_OPCODE; i++)
     {
@@ -318,8 +325,9 @@ void main()
         if (handler)
             data->table->trueOpCount++;
         data->table->opCount++;
-
+#ifndef NO_TEXT_DUMP
         output->WriteString("0x%04X   %04i   %08X   %08X   %08X   SMSG   %s  %i  %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
+#endif
         dbWriter.addSMSG(*data, FIX_ADDR((int)handler));
     }
 
@@ -387,9 +395,11 @@ void main()
     }
 
     // Write table header for CMSG
+#ifndef NO_TEXT_DUMP
     output->WriteString("---------------------------------------------");
     output->WriteString("  Hex  |  Dec  |  VTable  |  CliPut  | Type |");
     output->WriteString("---------------------------------------------");
+#endif
     
     // Log all CMSG opcodes to text file
     for (int i = 0; i < 0x1FFF; i++)
@@ -399,7 +409,9 @@ void main()
         if (cmsg == cmsgMap.end())
             continue;
 
+#ifndef NO_TEXT_DUMP
         output->WriteString("0x%04X   %04i   %08X   %08X   CMSG", cmsg->first, cmsg->first, FIX_ADDR(cmsg->second.offset), FIX_ADDR(*(uint32*)cmsg->second.putData));
+#endif
         dbWriter.addCMSG(cmsg);
     }
 
@@ -420,7 +432,9 @@ void main()
     ConsoleWrite("Shutting down WoW in %i seconds", SHUTDOWN_TIMER);
 
     // Flush & Close loggers & output ~
+#ifndef NO_TEXT_DUMP
     delete output;
+#endif
     delete debugLogger;
     delete shiftDebugLogger;
 

@@ -39,6 +39,9 @@ extern int Build;
 #define LOG_SHIFT shiftDebugLogger->WriteString
 #define FIX_ADDR(addr)(addr - (int)GetModuleHandle(NULL) + 0x400000)
 
+// Comment this out to have the dll dump opcodes to a text file
+#define NO_TEXT_DUMP
+
 #define DB_VERSION 1.0
 
 #pragma once
