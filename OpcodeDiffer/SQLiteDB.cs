@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data.SQLite;
 
 namespace OpcodeDiffer
@@ -46,29 +44,29 @@ namespace OpcodeDiffer
     /// </summary>
     public class DiffDB : SQLiteDB
     {
-        public DiffDB(string dbPath) : base(dbPath) { }
+        public DiffDB(string dbPath) : base(dbPath) 
+        {
+            getAddr2FromAddr1 = new SQLiteCommand("SELECT address2 FROM function WHERE address1=@addr1", dbConnection);
+            getConfidenceFromAddr1 = new SQLiteCommand("SELECT confidence FROM function WHERE address1=@addr1", dbConnection);
+        }
 
-        //public Int32 getOldFunction(uint NewFunctionAddr)
-        //{
-        //    string sql = string.Format("SELECT * FROM function WHERE address1={0}", NewFunctionAddr.ToString());
-        //    SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
-        //    reader = command.ExecuteReader();
-        //    if (reader.Read())
-        //        return reader.GetInt32(2);
-        //    else
-        //        return 0;
-        //}
+        SQLiteCommand getAddr2FromAddr1;
+        SQLiteCommand getConfidenceFromAddr1;
 
-        //public double getCertianty(uint NewFunctionAddr)
-        //{
-        //    string sql = string.Format("SELECT * FROM function WHERE address1={0}", NewFunctionAddr.ToString());
-        //    SQLiteCommand command = new SQLiteCommand(sql, dbConnection);
-        //    reader = command.ExecuteReader();
-        //    if (reader.Read())
-        //        return reader.GetDouble(4);
-        //    else
-        //        return 0.0f;
-        //}
+        public UInt32 GetAddr2FromAddr1(UInt32 addr1)
+        {
+            getAddr2FromAddr1.Parameters.AddWithValue("@addr1", addr1);
+
+            return Convert.ToUInt32(getAddr2FromAddr1.ExecuteScalar());
+
+        }
+
+        public double GetConfidenceFromAddr1(UInt32 addr1)
+        {
+            getConfidenceFromAddr1.Parameters.AddWithValue("@addr1", addr1);
+
+            return (double)getConfidenceFromAddr1.ExecuteScalar();
+        }
     }
 
     /// <summary>
@@ -174,7 +172,11 @@ namespace OpcodeDiffer
             SMSG_getNameFromHandler.Parameters.AddWithValue("@handler", handler);
 
             // Execute query
-            return (string)SMSG_getNameFromHandler.ExecuteScalar();
+            var name = SMSG_getNameFromHandler.ExecuteScalar();
+            if (name != DBNull.Value)
+                return (string)name;
+            else
+                return String.Empty;
 
         }
         public string CMSG_GetNameFromCaller(UInt32 caller)
@@ -183,7 +185,11 @@ namespace OpcodeDiffer
             CMSG_getNameFromCaller.Parameters.AddWithValue("@caller", caller);
 
             // Execute query
-            return (string)CMSG_getNameFromCaller.ExecuteScalar();
+            var name = CMSG_getNameFromCaller.ExecuteScalar();
+            if (name != DBNull.Value)
+                return (string)name;
+            else
+                return String.Empty;
         }
     }
 

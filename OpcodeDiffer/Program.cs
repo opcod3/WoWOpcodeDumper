@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Reflection;
-using System.Diagnostics;
 
 namespace OpcodeDiffer
 {
@@ -18,8 +16,8 @@ namespace OpcodeDiffer
         public static NameDB nameDB { get; private set; }
         public static DumpDB dumpDB { get; private set; }
 
-        private static List<CMSG> LoadedCMSG = new List<CMSG>(500);
-        private static List<SMSG> LoadedSMSG = new List<SMSG>(500); 
+        public static List<CMSG> LoadedCMSG = new List<CMSG>(500);
+        public static List<SMSG> LoadedSMSG = new List<SMSG>(500); 
 
         static void Main(string[] args)
         {
@@ -28,6 +26,11 @@ namespace OpcodeDiffer
 
             if (args.Length == 1)
                 dumpDB = new DumpDB(args[0]);
+            else if (args.Length == 2)
+            {
+                dumpDB = new DumpDB(args[0]);
+                funcDiff = new DiffDB(args[1]);
+            }
             else
                 dumpDB = new DumpDB("Dump.db");
 
@@ -48,6 +51,11 @@ namespace OpcodeDiffer
                     LoadedSMSG.Add(smsg);
                 }
 
+            }
+
+            if(funcDiff != null && funcDiff.isOpen())
+            {
+                Namer.populateFromDiff();
             }
 
             Logger.WriteLine(LoadedCMSG.First().getTableHeader());
