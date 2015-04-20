@@ -41,9 +41,9 @@ JamData GetData(uint8* addr)
 			if (addr[i + 6] == 0x8D && addr[i + 11] == 0xE8)
 			{
 				JamData data;
-				data.ctor = ((int)addr + i) + (*(int*)(addr + i + 1)) + 5;
-				data.callHandler = ((int)addr + i + 11) + (*(int*)(addr + i + 12)) + 5;
-				data.startsAt = ((int)addr) + i;
+                data.ctor = ((uint32)addr + i) + (*(uint32*)(addr + i + 1)) + 5;
+                data.callHandler = ((uint32)addr + i + 11) + (*(uint32*)(addr + i + 12)) + 5;
+                data.startsAt = ((uint32)addr) + i;
 				int additionalLen = 0;
 
 				if (addr[i + 16] == 0x8D)
@@ -57,16 +57,16 @@ JamData GetData(uint8* addr)
 				}
 
 				data.len = 15 + i + 1 + additionalLen;
-				data.addr = (int)addr;
+                data.addr = (uint32)addr;
 				return data;
 			}
 
 			if (addr[i + 6] == 0x4D && addr[i + 8] == 0xE8)
 			{
 				JamData data;
-				data.ctor = ((int)addr + i) + (*(int*)(addr + i + 1)) + 5;
-				data.callHandler = ((int)addr + i + 8) + (*(int*)(addr + i + 9)) + 5;
-				data.startsAt = ((int)addr) + i;
+                data.ctor = ((uint32)addr + i) + (*(uint32*)(addr + i + 1)) + 5;
+                data.callHandler = ((uint32)addr + i + 8) + (*(uint32*)(addr + i + 9)) + 5;
+                data.startsAt = ((uint32)addr) + i;
 				int additionalLen = 0;
 
 				if (addr[i + 13] == 0x8D)
@@ -81,7 +81,7 @@ JamData GetData(uint8* addr)
 				}
 
 				data.len = 12 + i + 1 + additionalLen;
-				data.addr = (int)addr;
+                data.addr = (uint32)addr;
 				return data;
 			}
 
