@@ -34,18 +34,24 @@ JamData GetData(uint8* addr)
 	data.ctor = 0;
 	data.callHandler = 0;
 
+
+    // Iterates through the client to find the JamData.
 	for (int i = 0; i < 50; i++)
 	{
 		if (addr[i] == 0xE8 && addr[i + 5] == 0x8D)
 		{
+            // If the address iteration + 6 is LEA and address iteration + 11 is Call
 			if (addr[i + 6] == 0x8D && addr[i + 11] == 0xE8)
 			{
+                // Finds the data based on the address for ctor and call handler.
 				JamData data;
                 data.ctor = ((uint32)addr + i) + (*(uint32*)(addr + i + 1)) + 5;
                 data.callHandler = ((uint32)addr + i + 11) + (*(uint32*)(addr + i + 12)) + 5;
                 data.startsAt = ((uint32)addr) + i;
 				int additionalLen = 0;
 
+
+                // LEA
 				if (addr[i + 16] == 0x8D)
 				{
 					if (addr[i + 17] == 0x8D)
@@ -61,14 +67,17 @@ JamData GetData(uint8* addr)
 				return data;
 			}
 
+            // If the address iteration +6 is 0x4D and address iteration + 8 is Call
 			if (addr[i + 6] == 0x4D && addr[i + 8] == 0xE8)
 			{
+                // Finds the data based on the address for ctor and call handler.
 				JamData data;
                 data.ctor = ((uint32)addr + i) + (*(uint32*)(addr + i + 1)) + 5;
                 data.callHandler = ((uint32)addr + i + 8) + (*(uint32*)(addr + i + 9)) + 5;
                 data.startsAt = ((uint32)addr) + i;
 				int additionalLen = 0;
 
+                // LEA
 				if (addr[i + 13] == 0x8D)
 				{
 					if (addr[i + 14] == 0x8D)
@@ -88,6 +97,7 @@ JamData GetData(uint8* addr)
 		}
 	}
 
+    // Cannot obtain address
 	assert("Fatal error at getting addr" && false);
 	return data;
 }
@@ -127,6 +137,7 @@ DWORD RemoveProtectDataStore(char* ptr, int len)
 	return oldProtect;
 }
 
+// Generate Handler data. 
 void FillHandler(JamData& data)
 {
 	uint8 buffer[60];
@@ -227,8 +238,6 @@ void main()
 
     FillCallList();
 
-    ConsoleWrite("Dumping Opcodes!");
-
     int32* addr = FindGroupVtableOffset();
     LOG_DEBUG("GroupVtableListPointer: 0x%08X (0x%08X)", FIX_ADDR(addr), addr);
     assert("Wrong GroupVtableListPointer" && addr);
@@ -240,6 +249,7 @@ void main()
 
     LOG_DEBUG("Detected %i JAM vtables", groupCount);
 
+    // Patterns for JAM opcodes.
     std::list<std::vector<uint8>> possibleJamPatterns;
     possibleJamPatterns.push_back({ 0xFF, 0x73, 0x0C });
     possibleJamPatterns.push_back({ 0xFF, 0x75, 0x0C });
@@ -283,7 +293,6 @@ void main()
         for (int i = 0; i < groupCount; i++)
         {
             GroupVtable* vtable = groups[i];
-
             if (vtable->IsJam(opcode))
             {
                 vtable->Call(fakeStore, 0, 0, 0, opcode, fakeStore);
@@ -291,12 +300,7 @@ void main()
             }
         }
     }
-
     delete fakeStore;
-
-#ifdef NAME_MAPPING
-    MapOpcodeNames(&opcodeMap);
-#endif
 
     std::unordered_map<int, JamData*> newOpcodeMap;
     for ( std::unordered_map<int, JamData*>::const_iterator iter = opcodeMap.begin(); iter != opcodeMap.end(); iter++)
@@ -325,9 +329,11 @@ void main()
         if (handler)
             data->table->trueOpCount++;
         data->table->opCount++;
+
 #ifndef NO_TEXT_DUMP
         output->WriteString("0x%04X   %04i   %08X   %08X   %08X   SMSG   %s  %i  %s%s", data->opcode, data->opcode, FIX_ADDR(data->ctor), FIX_ADDR(data->callHandler), FIX_ADDR((int)handler), data->table->name, data->table->IsInstanceServer(data->opcode), data->opcodeName.c_str(), handler ? " - Naming Coming Soon" : " - Fake Opcode");
 #endif
+
         dbWriter.addSMSG(*data, FIX_ADDR((int)handler));
     }
 
@@ -418,6 +424,7 @@ void main()
     int totalCount = 0;
     int trueCount = 0;
 
+    // Iterate through the groups and opcodes within them.
     for (int i = 0; i < groupCount; i++)
     {
         GroupVtable* group = groups[i];
