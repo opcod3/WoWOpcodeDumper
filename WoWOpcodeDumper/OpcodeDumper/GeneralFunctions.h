@@ -10,8 +10,8 @@ extern int GetBuild();
 
 struct ConsoleInfo
 {
-	int32 HotkeyAddr;
-	int32 EnableAddr;
+    int32 HotkeyAddr;
+    int32 EnableAddr;
 };
 
 extern ConsoleInfo GetConsoleInfo();

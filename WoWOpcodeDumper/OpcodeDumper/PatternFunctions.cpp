@@ -77,7 +77,7 @@ void* FindPattern(uint8* source, int len, uint8* pattern, int patternLen, std::s
 
         if (matches == patternLen)
 
-        return (void*)(i + (int)source);
+            return (void*)(i + (int)source);
     }
 
     return 0;

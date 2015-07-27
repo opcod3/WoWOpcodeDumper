@@ -1,7 +1,5 @@
 #include <windows.h>
 #include <TlHelp32.h>
-#include <shlwapi.h>
-#include <conio.h>
 #include <stdio.h>
 #include <string>
 #include <stdlib.h>
@@ -11,7 +9,7 @@
 // Possilbe names of the process to attach to
 std::string processNames[] = { /*Used for setting a name with an argument*/"", "Wow.exe", "Wow_Patched.exe", "WowT.exe", "WoWT_Patched.exe" };
 // Name of DLL to inject
-char* dllToInjectName = "OpcodeDumper.dll";
+char* dllToInjectName = { "OpcodeDumper.dll" };
 
 // Injects DLL into a process
 BOOL Inject(DWORD pID, const char * DLL_PATH);
@@ -37,7 +35,7 @@ int main(int argc, char * argv[])
         processNames[0] = std::string(argv[1]);
 
     // Get process in which to inject
-	int processId = GetTargetThreadID();
+    int processId = GetTargetThreadID();
 
     //Exit if no process found
     if (processId == 0)
@@ -48,9 +46,8 @@ int main(int argc, char * argv[])
     }
 
     // Get path of DLL to inject
-	char buffer[MAX_PATH] = { 0 };
-	GetFullPathNameA(dllToInjectName, MAX_PATH, buffer, NULL);
-
+    char buffer[MAX_PATH] = { 0 };
+    GetFullPathNameA(dllToInjectName, MAX_PATH, buffer, nullptr);
 
     // Try to inject
     if (!Inject(processId, buffer))
@@ -58,20 +55,20 @@ int main(int argc, char * argv[])
         printf("ERROR: Dll failed to inject.\n");
         PauseSystem();
     }
-	else
-		printf("Dll has been injected!\n");
+    else
+        printf("Dll has been injected!\n");
 
     printf("Exiting... ");
     Sleep(3000);
-	return 0;
+    return 0;
 }
 
 BOOL Inject(DWORD pID, const char * DLL_PATH)
 {
-	HANDLE Proc;
-	LPVOID remoteString, loadLibraryA;
+    HANDLE Proc;
+    LPVOID remoteString, loadLibraryA;
 
-	Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pID);
+    Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pID);
 
     if (!Proc)
     {
@@ -80,33 +77,33 @@ BOOL Inject(DWORD pID, const char * DLL_PATH)
     }
 
     // Get address of LoadLibraryA function
-	loadLibraryA = (LPVOID)GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+    loadLibraryA = LPVOID(GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA"));
 
     // Reserve some space in memory for DLL_PATH string
-	remoteString = (LPVOID)VirtualAllocEx(Proc, NULL, strlen(DLL_PATH), MEM_COMMIT, PAGE_READWRITE);
+    remoteString = LPVOID(VirtualAllocEx(Proc, nullptr, strlen(DLL_PATH), MEM_COMMIT, PAGE_READWRITE));
     // Write DLL_PATH to memory
-	WriteProcessMemory(Proc, (LPVOID)remoteString, DLL_PATH, strlen(DLL_PATH), NULL);
+    WriteProcessMemory(Proc, LPVOID(remoteString), DLL_PATH, strlen(DLL_PATH), nullptr);
 
     // Create thread
-	HANDLE remoteThread = CreateRemoteThread(Proc, NULL, NULL, (LPTHREAD_START_ROUTINE)loadLibraryA, (LPVOID)remoteString, NULL, NULL);
+    HANDLE remoteThread = CreateRemoteThread(Proc, nullptr, NULL, LPTHREAD_START_ROUTINE(loadLibraryA), LPVOID(remoteString), NULL, nullptr);
 
-	if (remoteThread)
-		WaitForSingleObject(remoteThread, INFINITE);
+    if (remoteThread)
+        WaitForSingleObject(remoteThread, INFINITE);
 
     // Free reserved memory and close handle
-	VirtualFreeEx(Proc, remoteString, strlen(DLL_PATH), MEM_RELEASE);
-	CloseHandle(Proc);
+    VirtualFreeEx(Proc, remoteString, strlen(DLL_PATH), MEM_RELEASE);
+    CloseHandle(Proc);
 
-	return true;
+    return true;
 }
 
 DWORD GetTargetThreadID()
 {
-	tagPROCESSENTRY32 pe;
-	HANDLE snapShot;
-	BOOL retval, ProcFound = false;
+    tagPROCESSENTRY32 pe;
+    HANDLE snapShot;
+    BOOL retval;
 
-	snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
     if (snapShot == INVALID_HANDLE_VALUE)
     {
@@ -114,12 +111,12 @@ DWORD GetTargetThreadID()
         return 0;
     }
 
-	pe.dwSize = sizeof(tagPROCESSENTRY32);
+    pe.dwSize = sizeof(tagPROCESSENTRY32);
 
-	retval = Process32First(snapShot, &pe);
+    retval = Process32First(snapShot, &pe);
 
-	while (retval)
-	{
+    while (retval)
+    {
         int length = sizeof(processNames) / sizeof(std::string);
         for (int i = 0; i < length; i++)
         {
@@ -129,9 +126,9 @@ DWORD GetTargetThreadID()
             }
         }
 
-		retval = Process32Next(snapShot, &pe);
-	}
-	return 0;
+        retval = Process32Next(snapShot, &pe);
+    }
+    return 0;
 }
 
 void PauseSystem()

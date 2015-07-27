@@ -98,7 +98,6 @@ JamData GetData(uint8* addr)
     return data;
 }
 
-
 int FindApHandler(int* addr)
 {
     for (std::list<CallEntry*>::const_iterator iter = CallList.begin(); iter != CallList.end(); iter++)
@@ -137,7 +136,7 @@ DWORD RemoveProtectDataStore(char* ptr, int len)
     return oldProtect;
 }
 
-// Generate Handler data. 
+// Generate Handler data.
 void FillHandler(JamData& data)
 {
     uint8 buffer[60];
@@ -186,9 +185,9 @@ uint8* getCMSGCaller(uint8* vTable)
         if (callerFunc[0] == caller1[0])
         {
             if (callerFunc[1] == caller1[1])
-                break;     
+                break;
         }
-        
+
         if (callerFunc[0] == caller2[0])
         {
             if (callerFunc[1] == caller2[1])
@@ -200,7 +199,7 @@ uint8* getCMSGCaller(uint8* vTable)
         {
             if (callerFunc[1] == caller3[1])
                 if (callerFunc[2] == caller3[2])
-                    break;          
+                    break;
         }
 
         callerFunc -= 1;
@@ -304,11 +303,11 @@ void main()
     delete fakeStore;
 
     std::unordered_map<int, JamData*> newOpcodeMap;
-    for ( std::unordered_map<int, JamData*>::const_iterator iter = opcodeMap.begin(); iter != opcodeMap.end(); iter++)
+    for (std::unordered_map<int, JamData*>::const_iterator iter = opcodeMap.begin(); iter != opcodeMap.end(); iter++)
         if (newOpcodeMap.find(iter->second->opcode) == newOpcodeMap.end())
             newOpcodeMap[iter->second->opcode] = iter->second;
         else
-        ConsoleWrite("duplicate %X %X", newOpcodeMap.find(iter->second->opcode)->second->addr, iter->second->addr);
+            ConsoleWrite("duplicate %X %X", newOpcodeMap.find(iter->second->opcode)->second->addr, iter->second->addr);
 
 #ifndef NO_TEXT_DUMP
     output->WriteString("----------------------------------------------------------------------------");
@@ -338,18 +337,18 @@ void main()
         dbWriter.addSMSG(*data, FIX_ADDR((int)handler));
     }
 
-	// CMSG
+    // CMSG
     //
     // Pattern of the destructor used in CMSGs
     uint8 dtorPattern[] = { 0x55,                                // push     ebp
-                            0x8B, 0xEC,                          // mov      ebo, esp
-                            0x8B, 0x45, 0x08,                    // mov      eax, [ebp+a1]
-                            0x83, 0x60, 0x04, 0x00,              // and      dword ptr [eax+4], 0
-                            0x83, 0x60, 0x08, 0x00,              // and      dword ptr [eax+8], 0
-                            0xC7, 0x00, 0x00, 0x00, 0x00, 0x00,  // mov      dword ptr [eax], offset unk_XXXXXX
-                            0x5D,                                // pop      ebp
-                            0xC2, 0x04, 0x00                     // retn     4
-                          };
+        0x8B, 0xEC,                          // mov      ebo, esp
+        0x8B, 0x45, 0x08,                    // mov      eax, [ebp+a1]
+        0x83, 0x60, 0x04, 0x00,              // and      dword ptr [eax+4], 0
+        0x83, 0x60, 0x08, 0x00,              // and      dword ptr [eax+8], 0
+        0xC7, 0x00, 0x00, 0x00, 0x00, 0x00,  // mov      dword ptr [eax], offset unk_XXXXXX
+        0x5D,                                // pop      ebp
+        0xC2, 0x04, 0x00                     // retn     4
+    };
 
     std::string patternOp = "ppppppppppppppppaaaapppp";
 
@@ -358,24 +357,24 @@ void main()
     uint32* dtorAddr_i = (uint32*)FindPattern(dtorPattern, sizeof(dtorPattern), patternOp);
     memcpy(dtorAddr, &dtorAddr_i, sizeof(dtorAddr));
 
-    // Find all occurrences of the dtor 
+    // Find all occurrences of the dtor
     // 0x800000 seems to be a random/estimated value before which vTables don't occur
     std::list<void*> cmsgOpList = FindMultiplePatterns((uint8*)(GetMainModuleAddress() + 0x800000), GetMainModuleSize() - 0x800000, dtorAddr, sizeof(dtorAddr), "pppp");
 
     // Go through all occurrences of the dtor
     std::unordered_map<uint32, CMSGOP> cmsgMap;
-    for (std::list<void*> ::const_iterator dtor = cmsgOpList.begin(); dtor != cmsgOpList.end(); )
-	{
+    for (std::list<void*> ::const_iterator dtor = cmsgOpList.begin(); dtor != cmsgOpList.end();)
+    {
         // Get address of cliPutWithMsgId
         uint32* cliPutWithMsgId = (uint32*)(((uint32)*dtor) - 4);
 
         // Check if cliPutWithMsgId is within the main module
-        if ((int)*cliPutWithMsgId < GetMainModuleAddress() || (int)*cliPutWithMsgId > (GetMainModuleAddress() + GetMainModuleSize()))
+        if ((int)*cliPutWithMsgId < GetMainModuleAddress() || (int)*cliPutWithMsgId >(GetMainModuleAddress() + GetMainModuleSize()))
         {
             dtor = cmsgOpList.erase(dtor);
             continue;
         }
-    
+
         // Check if cliPutWithMsgId pushes opcode as an argument
         uint8* cliPutWithMsgIdAddr = (uint8*)*cliPutWithMsgId;
         if ((cliPutWithMsgIdAddr[9] == 0x68 && cliPutWithMsgIdAddr[0xE] == 0xE8) || // push [OPCODE](DWORD) call [CDataStore__PutUInt32]
@@ -407,7 +406,7 @@ void main()
     output->WriteString("  Hex  |  Dec  |  VTable  |  CliPut  | Type |");
     output->WriteString("---------------------------------------------");
 #endif
-    
+
     // Log all CMSG opcodes to text file
     for (int i = 0; i < 0x1FFF; i++)
     {
@@ -467,18 +466,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 {
     switch (ul_reason_for_call)
     {
-        case DLL_PROCESS_ATTACH:
-        {
-            char module[2024];
-            //currentModule = hModule;
-            GetModuleFileNameA(hModule, module, 2024);
-            WorkingDir = GetDirectory(module);
-            ModulePath = WorkingDir;
-            CreateThread(0, 0, (LPTHREAD_START_ROUTINE)&main, 0, 0, 0);
-        }
-        case DLL_THREAD_ATTACH:
-        case DLL_THREAD_DETACH:
-        case DLL_PROCESS_DETACH:
+    case DLL_PROCESS_ATTACH:
+    {
+        char module[2024];
+        //currentModule = hModule;
+        GetModuleFileNameA(hModule, module, 2024);
+        WorkingDir = GetDirectory(module);
+        ModulePath = WorkingDir;
+        CreateThread(0, 0, (LPTHREAD_START_ROUTINE)&main, 0, 0, 0);
+    }
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
         break;
     }
     return TRUE;

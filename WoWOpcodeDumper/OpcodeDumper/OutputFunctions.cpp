@@ -61,7 +61,7 @@ FileWriter::~FileWriter()
 
 void InitializeDebugLoggers(std::string path)
 {
-    if (CreateDirectoryA(path.c_str(), 0) || GetLastError() == ERROR_ALREADY_EXISTS)
+    if (CreateDirectoryA(path.c_str(), nullptr) || GetLastError() == ERROR_ALREADY_EXISTS)
     {
         debugLogger = new FileWriter("%s\\%s", path.c_str(), FILENAME_DEBUG);
     }
@@ -74,7 +74,7 @@ SQLiteWriter::SQLiteWriter(const char* filePath, int clientBuild)
     // Delete DB if it already exists
     DeleteFileA(filePath);
 
-    int dbResult = sqlite3_open_v2(filePath, &db, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, NULL);
+    int dbResult = sqlite3_open_v2(filePath, &db, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, nullptr);
     if (dbResult)
     {
         LOG_DEBUG("Unable to open sqlite database!\nError: %s", sqlite3_errstr(dbResult));
@@ -83,18 +83,18 @@ SQLiteWriter::SQLiteWriter(const char* filePath, int clientBuild)
 
     // Create Version, CMSG and SMSG tables in DB
     char* errmsg;
-    if (sqlite3_exec(db, createCMSG, NULL, NULL, &errmsg))
+    if (sqlite3_exec(db, createCMSG, nullptr, nullptr, &errmsg))
     {
         LOG_DEBUG("SQLITE ERROR(createCMSG): %s", errmsg);
         assert("Failed to create CMSG table in SQLite database");
     }
 
-    if (sqlite3_exec(db, createSMSG, NULL, NULL, &errmsg))
+    if (sqlite3_exec(db, createSMSG, nullptr, nullptr, &errmsg))
     {
         LOG_DEBUG("SQLITE ERROR(createSMSG): %s", errmsg);
         assert("Failed to create SMSG table in SQLite database");
     }
-    if (sqlite3_exec(db, createVersion, NULL, NULL, &errmsg))
+    if (sqlite3_exec(db, createVersion, nullptr, nullptr, &errmsg))
     {
         LOG_DEBUG("SQLITE ERROR(createVersion): %s", errmsg);
         assert("Failed to create Version table in SQLite database");
@@ -102,12 +102,12 @@ SQLiteWriter::SQLiteWriter(const char* filePath, int clientBuild)
 
     // Create statements to insert data into tables
     int err;
-    if (err = sqlite3_prepare_v2(db, CMSGInsertQuery, -1, &CMSGstmt, NULL))
+    if (err = sqlite3_prepare_v2(db, CMSGInsertQuery, -1, &CMSGstmt, nullptr))
     {
         LOG_DEBUG("SQLITE ERROR(CMSGstmt): %s", sqlite3_errstr(err));
         assert("Unable to prepare CMSG insert statement");
     }
-    if (err = sqlite3_prepare_v2(db, SMSGInsertQuery, -1, &SMSGstmt, NULL))
+    if (err = sqlite3_prepare_v2(db, SMSGInsertQuery, -1, &SMSGstmt, nullptr))
     {
         LOG_DEBUG("SQLITE ERROR(SMSGstmt): %s", sqlite3_errstr(err));
         assert("Unable to prepare SMSG insert statement");
@@ -115,12 +115,12 @@ SQLiteWriter::SQLiteWriter(const char* filePath, int clientBuild)
 
     // Write version info to the Version table
     sqlite3_stmt *versionStmt;
-    if (err = sqlite3_prepare_v2(db, VersionInsertQuery, -1, &versionStmt, NULL))
+    if (err = sqlite3_prepare_v2(db, VersionInsertQuery, -1, &versionStmt, nullptr))
     {
         LOG_DEBUG("SQLITE ERROR(versionStmt): %s", sqlite3_errstr(err));
         assert("Unable to prepare Version create statement");
     }
-    
+
     // Bind data to version statement
     sqlite3_bind_int(versionStmt, 1, clientBuild);
     sqlite3_bind_double(versionStmt, 2, DB_VERSION);

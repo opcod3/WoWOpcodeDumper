@@ -10,5 +10,5 @@ int GetMainModuleSize()
 
 int GetMainModuleAddress()
 {
-    return (int)GetMainModule();
+    return int(GetMainModule());
 }

@@ -37,7 +37,7 @@ extern int Build;
 #define FIX_ADDR(addr)(addr - (int)GetModuleHandle(NULL) + 0x400000)
 
 // Comment this out to have the dll dump opcodes to a text file
-#define NO_TEXT_DUMP
+//#define NO_TEXT_DUMP
 
 #define DB_VERSION 1.0
 
